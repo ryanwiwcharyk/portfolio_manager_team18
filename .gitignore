@@ -1,3 +1,18 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# VSCode
+.vscode/
+
 # Compiled class file
 *.class
 
@@ -22,3 +37,6 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# macOS
+.DS_Store
