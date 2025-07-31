@@ -14,16 +14,26 @@ public class StockController {
 
     @GetMapping("/{portfolioID}")
     public List<Stock> getByPortfolioID(@PathVariable Integer portfolioID) {
-        return stockService.getByPortfolioID(portfolioID);
+        return stockService.getStockByPortfolioId(portfolioID);
+    }
+
+    @GetMapping("/{portfolioID}/{ticker}")
+    public Stock getById(@PathVariable Integer portfolioID, @PathVariable String ticker) {
+        return stockService.getStockByTickerAndPortfolioId(ticker, portfolioID);
     }
 
     @PostMapping
-    public Stock create(@RequestBody Stock s) {
-        return stockService.save(s);
+    public Stock create(@RequestBody NewStockRequest req) {
+        return stockService.saveNewStockRequest(req);
+    }
+
+    @PutMapping("/{portfolioID}/{ticker}")
+    public Stock update(@PathVariable Integer portfolioID, @PathVariable String ticker, @RequestBody UpdateStockRequest req) {
+        return stockService.updateStockRequest(ticker, portfolioID, req);
     }
 
     @DeleteMapping("/{portfolioID}/{ticker}")
     public void delete(@PathVariable Integer portfolioID, @PathVariable String ticker) {
-        stockService.delete(ticker, portfolioID);
+        stockService.deleteStockById(ticker, portfolioID);
     }
 }

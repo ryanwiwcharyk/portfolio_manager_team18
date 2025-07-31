@@ -17,8 +17,4 @@ public class TransactionController {
         return transactionService.getByPortfolioID(portfolioID);
     }
 
-    @PostMapping
-    public Transaction create(@RequestBody Transaction txn) {
-        return transactionService.save(txn);
-    }
 }

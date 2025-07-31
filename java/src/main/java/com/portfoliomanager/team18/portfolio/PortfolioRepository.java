@@ -2,7 +2,9 @@ package com.portfoliomanager.team18.portfolio;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
+import java.util.Optional;
 
+public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
+    Optional<Portfolio> findByPortfolioName(String portfolioName);
 }
 

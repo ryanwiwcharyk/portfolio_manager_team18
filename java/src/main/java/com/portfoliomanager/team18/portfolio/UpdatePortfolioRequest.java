@@ -1,33 +1,14 @@
 package com.portfoliomanager.team18.portfolio;
 
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "portfolios")
-public class Portfolio {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer portfolioID;
+public class UpdatePortfolioRequest {
     private String portfolioName;
     private BigDecimal cash;
 
-    public Portfolio() {
-    }
-
-    public Portfolio(Integer portfolioID, String portfolioName, BigDecimal cash) {
-        this.portfolioID = portfolioID;
+    public UpdatePortfolioRequest(String portfolioName, BigDecimal cash) {
         this.portfolioName = portfolioName;
         this.cash = cash;
-    }
-
-    public Integer getPortfolioID() {
-        return portfolioID;
-    }
-
-    public void setPortfolioID(Integer portfolioID) {
-        this.portfolioID = portfolioID;
     }
 
     public String getPortfolioName() {
@@ -44,5 +25,13 @@ public class Portfolio {
 
     public void setCash(BigDecimal cash) {
         this.cash = cash;
+    }
+
+    @Override
+    public String toString() {
+        return "UpdatePortfolioRequest{" +
+                "portfolioName='" + portfolioName + '\'' +
+                ", cash=" + cash +
+                '}';
     }
 }

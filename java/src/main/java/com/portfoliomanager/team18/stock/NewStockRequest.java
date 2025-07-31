@@ -1,24 +1,14 @@
 package com.portfoliomanager.team18.stock;
 
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "stocks")
-@IdClass(StockId.class)
-public class Stock {
-    @Id
+public class NewStockRequest {
     private String tickerSymbol;
-    @Id
     private Integer portfolioID;
     private Integer qty;
     private BigDecimal avgPrice;
 
-    public Stock() {
-    }
-
-    public Stock(String tickerSymbol, Integer portfolioID, Integer qty, BigDecimal avgPrice) {
+    public NewStockRequest(String tickerSymbol, Integer portfolioID, Integer qty, BigDecimal avgPrice) {
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
         this.qty = qty;
@@ -55,5 +45,15 @@ public class Stock {
 
     public void setAvgPrice(BigDecimal avgPrice) {
         this.avgPrice = avgPrice;
+    }
+
+    @Override
+    public String toString() {
+        return "NewStockRequest{" +
+                "tickerSymbol='" + tickerSymbol + '\'' +
+                ", portfolioID=" + portfolioID +
+                ", qty=" + qty +
+                ", avgPrice=" + avgPrice +
+                '}';
     }
 }

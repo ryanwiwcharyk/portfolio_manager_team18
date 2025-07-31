@@ -13,12 +13,28 @@ public class PortfolioController {
     private PortfolioService portfolioService;
 
     @GetMapping
-    public List<Portfolio> getAll() {
-        return portfolioService.getAll();
+    public List<Portfolio> getAllPortfolio() {
+        return portfolioService.getAllPortfolio();
+    }
+
+    @GetMapping("/{id}")
+    public Portfolio getPortfolioById(@PathVariable Integer id) {
+        return portfolioService.getPortfolioById(id);
     }
 
     @PostMapping
-    public Portfolio create(@RequestBody Portfolio p) {
-        return portfolioService.save(p);
+    public Portfolio createPortfolio(@RequestBody NewPortfolioRequest req) {
+        return portfolioService.saveNewPortfolioRequest(req);
+    }
+
+    @PutMapping("/{id}")
+    public Portfolio updatePortfolio(@PathVariable Integer id, @RequestBody UpdatePortfolioRequest req) {
+        return portfolioService.updatePortfolioRequest(id, req);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deletePortfolio(@PathVariable Integer id) {
+        portfolioService.deletePortfolioById(id);
+    }
     }
 }
