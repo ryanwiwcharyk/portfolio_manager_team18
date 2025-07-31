@@ -12,9 +12,6 @@ public class PortfolioController {
     @Autowired
     private PortfolioService portfolioService;
 
-    @GetMapping(path = "/{portfolioId}")
-    public Portfolio getByPortfolioId(@PathVariable Integer portfolioId) { return portfolioService.getByPortfolioId(portfolioId); }
-
     @GetMapping
     public List<Portfolio> getAllPortfolio() {
         return portfolioService.getAllPortfolio();
@@ -38,6 +35,5 @@ public class PortfolioController {
     @DeleteMapping("/{id}")
     public void deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);
-    }
     }
 }
