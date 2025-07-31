@@ -14,7 +14,4 @@ public class TransactionService {
         return transactionRepo.findByPortfolioID(id);
     }
 
-    public Transaction save(Transaction txn) {
-        return transactionRepo.save(txn);
-    }
 }
