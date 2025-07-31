@@ -10,6 +10,8 @@ public class PortfolioService {
     @Autowired
     private PortfolioRepository portfolioRepo;
 
+    public Portfolio getByPortfolioId(Integer id) { return portfolioRepo.findByPortfolioID(id); }
+
     public List<Portfolio> getAll() {
         return portfolioRepo.findAll();
     }

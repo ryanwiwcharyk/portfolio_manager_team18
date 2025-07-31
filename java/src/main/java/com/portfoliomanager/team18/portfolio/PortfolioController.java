@@ -12,6 +12,9 @@ public class PortfolioController {
     @Autowired
     private PortfolioService portfolioService;
 
+    @GetMapping(path = "/{portfolioId}")
+    public Portfolio getByPortfolioId(@PathVariable Integer portfolioId) { return portfolioService.getByPortfolioId(portfolioId); }
+
     @GetMapping
     public List<Portfolio> getAll() {
         return portfolioService.getAll();
