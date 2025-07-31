@@ -1,0 +1,83 @@
+body {
+  background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.home-root {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  color: #2d3748;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  margin-right: 24px;
+}
+
+.button-container button {
+  background: #002B51;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.button-container button:hover {
+  background: #002B51;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.15);
+}
+
+.portfolio-container {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.portfolio-square {
+  width: 180px;
+  height: 180px;
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s, border 0.2s;
+  margin-bottom: 16px;
+}
+
+.portfolio-square:hover {
+  box-shadow: 0 6px 24px rgba(37,99,235,0.13);
+  border: 1.5px solid #002B51;
+}
+
+.portfolio-square h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  color: #002B51;
+}
+
+.portfolio-square p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 1rem;
+  text-align: center;
+}
