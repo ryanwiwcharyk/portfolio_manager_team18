@@ -13,7 +13,7 @@ public class PortfolioController {
     private PortfolioService portfolioService;
 
     @GetMapping(path = "/{portfolioId}")
-    public Portfolio getByPortfolioId(@PathVariable Integer portfolioId) { return portfolioService.getByPortfolioId(portfolioId); }
+    public Portfolio getByPortfolioId(@PathVariable Integer portfolioId) { return portfolioService.getPortfolioById(portfolioId); }
 
     @GetMapping
     public List<Portfolio> getAllPortfolio() {
@@ -39,5 +39,5 @@ public class PortfolioController {
     public void deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);
     }
-    }
+
 }
