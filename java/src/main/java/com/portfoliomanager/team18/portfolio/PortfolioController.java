@@ -36,4 +36,5 @@ public class PortfolioController {
     public void deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);
     }
+    }
 }
