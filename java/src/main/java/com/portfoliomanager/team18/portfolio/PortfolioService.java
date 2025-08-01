@@ -36,6 +36,7 @@ public class PortfolioService {
         Portfolio p = portfolioRepo.findById(id).orElse(null);
         if (p != null) {
             p.setPortfolioName(req.getPortfolioName());
+            p.setDescription(req.getDescription());
             p.setCash(req.getCash());
             return portfolioRepo.save(p);
         }
