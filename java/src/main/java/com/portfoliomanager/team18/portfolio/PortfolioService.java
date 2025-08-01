@@ -16,7 +16,12 @@ public class PortfolioService {
     }
 
     public Portfolio getPortfolioById(Integer id) {
-        return portfolioRepo.findById(id).orElse(null);
+        Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
+        if (existingPortfolio.isEmpty()) {
+            throw new IllegalArgumentException("Portfolio doesn't exist.");
+        }
+
+        return existingPortfolio.get();
     }
 
     public Portfolio saveNewPortfolioRequest(NewPortfolioRequest req) {
@@ -32,16 +37,24 @@ public class PortfolioService {
     }
 
     public Portfolio updatePortfolioRequest(Integer id, UpdatePortfolioRequest req) {
-        Portfolio p = portfolioRepo.findById(id).orElse(null);
-        if (p != null) {
-            p.setPortfolioName(req.getPortfolioName());
-            p.setCash(req.getCash());
-            return portfolioRepo.save(p);
+        Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
+        if (existingPortfolio.isEmpty()) {
+            throw new IllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
         }
-        return null;
+
+        Portfolio p = existingPortfolio.get();
+        p.setPortfolioName(req.getPortfolioName());
+        p.setCash(req.getCash());
+
+        return portfolioRepo.save(p);
     }
 
     public void deletePortfolioById(Integer id) {
+        Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
+        if (existingPortfolio.isEmpty()) {
+            throw new IllegalArgumentException("Portfolio doesn't exist.");
+        }
+
         portfolioRepo.deleteById(id);
     }
 }
