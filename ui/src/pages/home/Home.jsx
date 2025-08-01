@@ -1,62 +1,53 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { createPortfolio, getPortfolios } from '../../services/portfolioService';
 import './Home.css';
 
-const portfolios = [
-    {
-      id: 1,
-      name: 'Portfolio 1',
-      description: 'Description 1',
-    },
-    {
-      id: 2,
-      name: 'Portfolio 2',
-      description: 'Description 2',
-    },
-    {
-      id: 3,
-      name: 'Portfolio 3',
-      description: 'Description 3',
-    },
-    {
-      id: 4,
-      name: 'Portfolio 4',
-      description: 'Description 4',
-    },
-    {
-      id: 5,
-      name: 'Portfolio 5',
-      description: 'Description 5',
-    },
-    {
-      id: 6,
-      name: 'Portfolio 6',
-      description: 'Description 6',
-    },
-    {
-      id: 7,
-      name: 'Portfolio 7',
-      description: 'Description 7',
-    },
-    {
-      id: 8,
-      name: 'Portfolio 8',
-      description: 'Description 8',
-    },
-  ]
-
 function Home() {
+  const startingCash = 1000;
+  const [showModal, setShowModal] = React.useState(false);
+  const [portfolios, setPortfolios] = React.useState([]);
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
+
+  React.useEffect(() => {  
+    const fetchPortfolios = async () => {
+      try {
+        const response = await getPortfolios();
+        setPortfolios(response.data);
+      } catch (error) {
+        console.error('Error fetching portfolios:', error);
+      }
+    };
+    fetchPortfolios();
+  }, []);
 
   const handlePortfolioClick = () => {
     navigate('/dashboard');
   };
 
+  const handleOpenModal = () => {
+    setShowModal(true);
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  }
+
+  const onSubmit = async (data) => {
+    const portfolioData = {...data, cash: startingCash };
+    const response = await createPortfolio(portfolioData);
+    const newPortfolio = response.data;
+    setPortfolios(prev => [...prev, newPortfolio]);
+    setShowModal(false);
+  }
+
   return (
     <div className="home-root">
       <h1>Team 18 Portfolio Manager</h1>
       <div className="button-container">
-        <button><h3>Add Portfolio</h3></button>
+        <button onClick={handleOpenModal}><h3>Add Portfolio</h3></button>
       </div>
       <div className="portfolio-container">
         {portfolios.map((portfolio) => (
@@ -66,11 +57,29 @@ function Home() {
             onClick={handlePortfolioClick}
             style={{ cursor: 'pointer' }}
           >
-            <h2>{portfolio.name}</h2>
+            <h2>{portfolio.portfolioName}</h2>
             <p>{portfolio.description}</p>
           </div>
         ))}
       </div>
+      {showModal && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>Add Portfolio</h2>
+            <form className="form-control" onSubmit={handleSubmit(onSubmit)}>
+              <label htmlFor="name">Choose a name:</label>
+              <input {...register("portfolioName", {required: true })} id="name" type="text" placeholder="Portfolio Name" />
+              {errors.name && <span className='error-message'>A name is required</span>}
+              <label htmlFor="description">Description:</label>
+              <textarea {...register("description")} name="description" id="description"></textarea>
+              <div className="button-row">
+              <button type="submit">Create</button>
+              <button type="button" onClick={handleCloseModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
