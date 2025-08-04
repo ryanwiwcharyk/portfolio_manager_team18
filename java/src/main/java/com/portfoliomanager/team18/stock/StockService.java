@@ -21,69 +21,66 @@ public class StockService {
     }
 
     public Stock getStockByTickerAndPortfolioId(String ticker, Integer portfolioID) {
-        return stockRepo.findById(new StockId(ticker, portfolioID)).orElse(null);
+        Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
+        if (existingStock.isEmpty()) {
+            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
+        }
+
+        return existingStock.get();
     }
 
-    /*
-    Three situations:
-    1. portfolioId doesn't exists, return exception
-    2. portfolioId and ticker both exist, update stock quantity and average price
-    3. portfolioId exists, ticker doesn't exist, add this stock to portfolio
-     */
     public Stock saveNewStockRequest(NewStockRequest req) {
-        // Case 1. Check if portfolio exists
-        Optional<Portfolio> portfolioOpt = portfolioRepo.findById(req.getPortfolioID());
-        if (portfolioOpt.isEmpty()) {
+        // Check if portfolio exists
+        Optional<Portfolio> existingPortfolio = portfolioRepo.findById(req.getPortfolioID());
+        if (existingPortfolio.isEmpty()) {
             throw new IllegalArgumentException("Portfolio with ID " + req.getPortfolioID() + " does not exist.");
         }
-        // Construct composite key
+
         StockId stockId = new StockId(req.getTickerSymbol(), req.getPortfolioID());
 
         // Check if stock already exists
         Optional<Stock> existingStock = stockRepo.findById(stockId);
-
-        Stock stock;
         if (existingStock.isPresent()) {
-            // Case 2: Update stock quantity and calculate new average price
-            stock = existingStock.get();
-            int newTotalQty = stock.getQty() + req.getQty();
-
-            BigDecimal newAvgPrice = calculateAveragePrice(
-                    stock.getAvgPrice(), stock.getQty(),
-                    req.getAvgPrice(), req.getQty()
-            );
-
-            stock.setQty(newTotalQty);
-            stock.setAvgPrice(newAvgPrice);
-        } else {
-            // Case 3: Add new stock
-            stock = new Stock();
-            stock.setTickerSymbol(req.getTickerSymbol());
-            stock.setPortfolioID(req.getPortfolioID());
-            stock.setQty(req.getQty());
-            stock.setAvgPrice(req.getAvgPrice());
+            throw new IllegalArgumentException("Stock " + req.getTickerSymbol() + " already exists in portfolio " +
+                    req.getPortfolioID() + ". Please use the update method.");
         }
+
+        Stock stock = new Stock();
+        stock.setTickerSymbol(req.getTickerSymbol());
+        stock.setPortfolioID(req.getPortfolioID());
+        stock.setQty(req.getQty());
+        stock.setAvgPrice(req.getAvgPrice());
+
         return stockRepo.save(stock);
     }
 
     public Stock updateStockRequest(String ticker, Integer portfolioID, UpdateStockRequest req) {
-        Stock stock = stockRepo.findById(new StockId(ticker, portfolioID)).orElse(null);
-        if (stock != null) {
-            int newTotalQty = stock.getQty() + req.getQty();
-
-            BigDecimal newAvgPrice = calculateAveragePrice(
-                    stock.getAvgPrice(), stock.getQty(),
-                    req.getAvgPrice(), req.getQty()
-            );
-
-            stock.setQty(newTotalQty);
-            stock.setAvgPrice(newAvgPrice);
-            return stockRepo.save(stock);
+        Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
+        if (existingStock.isEmpty()) {
+            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID +
+                    ". Please add the stock first.");
         }
-        return null;
+
+        Stock stock = existingStock.get();
+        int newTotalQty = stock.getQty() + req.getQty();
+
+        BigDecimal newAvgPrice = calculateAveragePrice(
+                stock.getAvgPrice(), stock.getQty(),
+                req.getAvgPrice(), req.getQty()
+        );
+
+        stock.setQty(newTotalQty);
+        stock.setAvgPrice(newAvgPrice);
+
+        return stockRepo.save(stock);
     }
 
     public void deleteStockById(String ticker, Integer portfolioID) {
+        Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
+        if (existingStock.isEmpty()) {
+            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
+        }
+
         stockRepo.deleteById(new StockId(ticker, portfolioID));
     }
 
