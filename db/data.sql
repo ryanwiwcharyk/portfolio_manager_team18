@@ -1,0 +1,66 @@
+USE portfolio_manager;
+
+-- ADD PORTFOLIOS
+INSERT INTO portfolios(portfoioID, portfolioName, cash) VALUES
+(1, "Ryan's Portfolio", 5000,00),
+(2, "Hannah's Portfolio", 3000.00),
+(3, "Derin's Portfolio", 1000.00)
+
+INSERT INTO stocks (tickerSymbol, portfolioID, qty, avgPrice) VALUES
+-- Ryan Portfolio
+('AAPL', 1, 50),
+('MSFT', 1, 30, 280.50),
+('GOOGL', 1, 25, 120.75),
+('AMZN', 1, 40, 85.30),
+
+-- Hannah Portfolio
+('JNJ', 2, 100, 165.80),
+('PG', 2, 75, 145.20),
+('KO', 2, 200, 55.40),
+('WMT', 2, 60, 160.90),
+
+-- Derin Portfolio
+('NVDA', 3, 20, 450.75),
+('TSLA', 3, 15, 220.30),
+('META', 3, 35, 180.60),
+('NFLX', 3, 45, 95.20),
+('AMD', 3, 80, 110.45),
+
+-- TRANSACTIONS
+INSERT INTO transactions (tickerSymbol, portfolioID, price, qty, isSell, transactionTime) VALUES
+-- Ryan Portfolio
+('AAPL', 1, 145.00, 25, FALSE, '2024-01-15 10:30:00'),
+('AAPL', 1, 155.50, 25, FALSE, '2024-02-20 14:15:00'),
+('MSFT', 1, 270.00, 15, FALSE, '2024-01-10 09:45:00'),
+('MSFT', 1, 285.00, 15, FALSE, '2024-03-05 11:20:00'),
+('GOOGL', 1, 115.00, 25, FALSE, '2024-02-01 13:30:00'),
+('AMZN', 1, 80.00, 20, FALSE, '2024-01-25 15:45:00'),
+('AMZN', 1, 90.60, 20, FALSE, '2024-03-10 10:15:00'),
+
+-- Hannah Portfolio
+('JNJ', 2, 160.00, 50, FALSE, '2024-01-05 08:30:00'),
+('JNJ', 2, 170.60, 50, FALSE, '2024-02-15 12:45:00'),
+('PG', 2, 140.00, 40, FALSE, '2024-01-20 14:20:00'),
+('PG', 2, 150.40, 35, FALSE, '2024-03-01 09:30:00'),
+('KO', 2, 50.00, 100, FALSE, '2024-02-10 11:15:00'),
+('KO', 2, 60.80, 100, FALSE, '2024-03-15 16:00:00'),
+('WMT', 2, 155.00, 60, FALSE, '2024-01-30 13:45:00'),
+
+-- Derin Portfolio
+('NVDA', 3, 400.00, 10, FALSE, '2024-01-12 10:00:00'),
+('NVDA', 3, 500.50, 10, FALSE, '2024-02-25 14:30:00'),
+('TSLA', 3, 200.00, 15, FALSE, '2024-01-18 15:20:00'),
+('META', 3, 170.00, 20, FALSE, '2024-02-05 11:45:00'),
+('META', 3, 190.20, 15, FALSE, '2024-03-08 12:30:00'),
+('NFLX', 3, 90.00, 25, FALSE, '2024-01-22 09:15:00'),
+('NFLX', 3, 100.40, 20, FALSE, '2024-03-12 14:45:00'),
+('AMD', 3, 100.00, 40, FALSE, '2024-02-08 13:20:00'),
+('AMD', 3, 120.90, 40, FALSE, '2024-03-18 10:30:00'),
+
+-- Selling stock
+('AAPL', 1, 160.00, 10, TRUE, '2024-03-20 10:30:00'),
+('MSFT', 1, 290.00, 5, TRUE, '2024-03-22 14:15:00'),
+('GOOGL', 1, 125.00, 10, TRUE, '2024-03-25 11:45:00'),
+('NVDA', 3, 520.00, 5, TRUE, '2024-03-18 15:30:00'),
+('TSLA', 3, 230.00, 5, TRUE, '2024-03-21 09:20:00'),
+
