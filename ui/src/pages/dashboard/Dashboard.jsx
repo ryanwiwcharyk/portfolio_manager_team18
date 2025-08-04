@@ -7,14 +7,6 @@ import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
 import './dashboard.css';
 
-// // Mock data for demonstration
-// const portfolioSummary = [
-//   { name: 'AAPL', value: 12000, avgPrice: 100, change: 2.3, shares: 30 },
-//   { name: 'GOOGL', value: 8000, avgPrice: 800, change: -1.1, shares: 10 },
-//   { name: 'TSLA', value: 5000, avgPrice: 900, change: 4.7, shares: 5 },
-//   { name: 'AMZN', value: 3000, avgPrice: 1500, change: 0.5, shares: 2 },
-// ];
-
 const portfolioHistory = [
   { date: '2024-06-01', value: 25000 },
   { date: '2024-06-02', value: 25500 },
@@ -37,7 +29,6 @@ function Dashboard() {
         const response = await getPortfolioById(id);
         setPortfolio(response.data);
       } catch (error) {
-        console.error('Failed to fetch portfolio:', error);
         notify('Failed to fetch portfolio data: ' + error.message);
       }
     };

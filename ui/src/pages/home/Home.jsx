@@ -5,6 +5,7 @@ import { createPortfolio, getPortfolios, updatePortfolio, deletePortfolio } from
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { formatter } from '../../constants/constants';
+import { ToastContainer, toast } from 'react-toastify';
 import './Home.css';
 
 function Home() {
@@ -15,14 +16,15 @@ function Home() {
   const [currentPortfolio, setCurrentPortfolio] = React.useState(null);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const navigate = useNavigate();
-
+  const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
+  
   React.useEffect(() => {
     const fetchPortfolios = async () => {
       try {
         const response = await getPortfolios();
         setPortfolios(response.data);
       } catch (error) {
-        console.error('Error fetching portfolios:', error);
+        notify('Failed to fetch portfolios: ' + error.message);
       }
     };
     fetchPortfolios();
@@ -66,7 +68,7 @@ function Home() {
       await deletePortfolio(id);
       setPortfolios(prev => prev.filter(p => p.portfolioID !== id));
     } catch (error) {
-      alert('Failed to delete portfolio');
+      notify('Failed to delete portfolio: ' + error.message);
     }
   };
 
@@ -161,7 +163,7 @@ function Home() {
           </div>
         </div>
       )}
-
+      <ToastContainer />
     </div>
   );
 }
