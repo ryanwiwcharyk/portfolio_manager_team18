@@ -1,14 +1,25 @@
 USE portfolio_manager;
 
--- ADD PORTFOLIOS
-INSERT INTO portfolios(portfoioID, portfolioName, cash) VALUES
-(1, "Ryan's Portfolio", 5000,00),
-(2, "Hannah's Portfolio", 3000.00),
-(3, "Derin's Portfolio", 1000.00)
+-- DISABLE SAFE UPDATES TO ALLOW DELETION
+SET SQL_SAFE_UPDATES = 0;
 
-INSERT INTO stocks (tickerSymbol, portfolioID, qty, avgPrice) VALUES
+-- CLEAR EXISTING DATA
+DELETE FROM transactions;
+DELETE FROM stocks;
+DELETE FROM portfolios;
+
+-- RE-ENABLE SAFE UPDATES
+SET SQL_SAFE_UPDATES = 1;
+
+-- ADD PORTFOLIOS
+INSERT INTO portfolios(portfolioID, cash, portfolio_name, description) VALUES
+(1, 5000.00, "Ryan's Portfolio", "TFSA"),
+(2, 3000.00, "Hannah's Portfolio", "FHSA"),
+(3, 1000.00, "Derin's Portfolio", "RRSP");
+
+INSERT INTO stocks (ticker_symbol, portfolioid, qty, avg_price) VALUES
 -- Ryan Portfolio
-('AAPL', 1, 50),
+('AAPL', 1, 50, 150.25),
 ('MSFT', 1, 30, 280.50),
 ('GOOGL', 1, 25, 120.75),
 ('AMZN', 1, 40, 85.30),
@@ -24,10 +35,10 @@ INSERT INTO stocks (tickerSymbol, portfolioID, qty, avgPrice) VALUES
 ('TSLA', 3, 15, 220.30),
 ('META', 3, 35, 180.60),
 ('NFLX', 3, 45, 95.20),
-('AMD', 3, 80, 110.45),
+('AMD', 3, 80, 110.45);
 
 -- TRANSACTIONS
-INSERT INTO transactions (tickerSymbol, portfolioID, price, qty, isSell, transactionTime) VALUES
+INSERT INTO transactions (ticker_symbol, portfolioid, price, qty, is_sell, transaction_time) VALUES
 -- Ryan Portfolio
 ('AAPL', 1, 145.00, 25, FALSE, '2024-01-15 10:30:00'),
 ('AAPL', 1, 155.50, 25, FALSE, '2024-02-20 14:15:00'),
@@ -62,5 +73,5 @@ INSERT INTO transactions (tickerSymbol, portfolioID, price, qty, isSell, transac
 ('MSFT', 1, 290.00, 5, TRUE, '2024-03-22 14:15:00'),
 ('GOOGL', 1, 125.00, 10, TRUE, '2024-03-25 11:45:00'),
 ('NVDA', 3, 520.00, 5, TRUE, '2024-03-18 15:30:00'),
-('TSLA', 3, 230.00, 5, TRUE, '2024-03-21 09:20:00'),
+('TSLA', 3, 230.00, 5, TRUE, '2024-03-21 09:20:00');
 
