@@ -39,7 +39,7 @@ function Home() {
         description: currentPortfolio.description,
       });
     }
-  }, [showEditModal]);
+  }, [showEditModal, currentPortfolio, reset]);
 
   const handlePortfolioClick = () => {
     navigate('/dashboard');
