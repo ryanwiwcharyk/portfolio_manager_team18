@@ -1,7 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { getStocks } from '../../services/stockService';
+import { useForm } from 'react-hook-form';
+import { getStocks, purchaseStock } from '../../services/stockService';
 import { getPortfolioById } from '../../services/portfolioService';
+import { formatter } from '../../constants/constants';
 import './dashboard.css';
 
 // // Mock data for demonstration
@@ -21,21 +23,23 @@ const portfolioHistory = [
 ];
 
 function Dashboard() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const { id } = useParams();
   const [portfolio, setPortfolio] = React.useState(null);
   const [portfolioStocks, setPortfolioStocks] = React.useState([]);
+  const [showBuyModal, setShowBuyModal] = React.useState(false);
 
   React.useEffect(() => {
-      const fetchPortfolio = async () => {
-        try {
-          const response = await getPortfolioById(id);
-          setPortfolio(response.data);
-        } catch (error) {
-          console.error('Failed to fetch portfolio:', error);
-        }
-      };
-      fetchPortfolio();
-    }, [id]);
+    const fetchPortfolio = async () => {
+      try {
+        const response = await getPortfolioById(id);
+        setPortfolio(response.data);
+      } catch (error) {
+        console.error('Failed to fetch portfolio:', error);
+      }
+    };
+    fetchPortfolio();
+  }, [id]);
 
   React.useEffect(() => {
     const fetchStocks = async () => {
@@ -52,6 +56,35 @@ function Dashboard() {
   // Calculate max value for graph scaling
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
 
+  const onPurchaseSubmit = async (data) => {
+    try {
+      // Assuming data contains tickerSymbol and qty
+      const purchaseData = {
+        portfolioID: portfolio.portfolioID,
+        tickerSymbol: data.tickerSymbol,
+        qty: data.qty
+      }
+      console.log('Purchase data:', purchaseData);
+      const response = await purchaseStock(purchaseData);
+      const newStock = response.data;
+      setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
+    }
+    catch (error) {
+      console.error('Error purchasing stock:', error);
+    }
+    finally {
+      setShowBuyModal(false);
+    }
+  }
+
+  const handleOpenBuyModal = () => {
+    setShowBuyModal(true);
+  }
+
+  const handleCloseBuyModal = () => {
+    setShowBuyModal(false);
+  }
+
   if (!portfolio) {
     return <div>Loading...</div>;
   }
@@ -61,7 +94,7 @@ function Dashboard() {
       <h1>{portfolio.portfolioName}</h1>
       <h3>{portfolio.description}</h3>
       <div className="dashboard-actions-top">
-        <button className="dashboard-action-btn" >Buy</button>
+        <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
         <button className="dashboard-action-btn">Sell</button>
       </div>
       <div className="dashboard-section">
@@ -85,7 +118,10 @@ function Dashboard() {
         </div>
       </div>
       <div className="dashboard-section">
-        <h2>Portfolio Holdings</h2>
+        <div className="dashboard-section-header">
+          <h2>Portfolio Holdings</h2>
+          <h2>Portfolio Cash: {formatter.format(portfolio.cash)}</h2>
+        </div>
         <table className="dashboard-table">
           <thead>
             <tr>
@@ -98,18 +134,46 @@ function Dashboard() {
           </thead>
           <tbody>
             {portfolioStocks.map(stock => (
-              <tr key={stock.name}>
-                <td>{stock.name}</td>
-                <td>{stock.shares}</td>
+              <tr key={stock.tickerSymbol}>
+                <td>{stock.tickerSymbol}</td>
+                <td>{stock.qty}</td>
                 <td>{stock.avgPrice}</td>
-                <td>{stock.value.toLocaleString()}</td>
-                <td style={{ color: stock.change >= 0 ? 'green' : 'red' }}>{stock.change}</td>
+                {/* <td>{stock.value.toLocaleString()}</td>
+                <td style={{ color: stock.change >= 0 ? 'green' : 'red' }}>{stock.change}</td> */}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {showBuyModal && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>Purchase Stock</h2>
+            <form className="form-control" onSubmit={handleSubmit(onPurchaseSubmit)}>
+              <label htmlFor="name">Ticker Symbol: </label>
+              <input {...register("tickerSymbol",
+                {
+                  required: true,
+                  maxLength: 4,
+                  pattern: {
+                    value: /^[A-Za-z]{1,4}$/,
+                    message: "Ticker must be 1-4 letters"
+                  }
+                })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4}/>
+              {errors.tickerSymbol && <span className='error-message'>{errors.tickerSymbol.message || "A ticker symbol is required"}</span>}
+              <label htmlFor="description">Quantity:</label>
+              <input {...register("qty", { required: true })} id="quantity" type="number"></input>
+              {errors.qty && <span className='error-message'>{errors.qty.message || "A quantity is required"}</span>}
+              <div className="button-row">
+                <button type="submit">Purchase</button>
+                <button type="button" onClick={handleCloseBuyModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }
 

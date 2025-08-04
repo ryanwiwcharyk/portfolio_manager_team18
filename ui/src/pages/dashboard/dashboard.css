@@ -25,6 +25,19 @@
   font-size: 1.3rem;
 }
 
+.dashboard-section h3 {
+  margin-top: 0;
+  color: #002B51;
+  font-size: 1.1rem;
+}
+
+.dashboard-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .dashboard-graph {
   margin-top: 12px;
   margin-bottom: 8px;

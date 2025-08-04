@@ -1,11 +1,16 @@
 package com.portfoliomanager.team18.stock;
 
+import jakarta.persistence.Entity;
+
 import java.io.Serializable;
 import java.util.Objects;
+
 
 public class StockId implements Serializable {
     private String tickerSymbol;
     private Integer portfolioID;
+
+    public StockId() {}
 
     public StockId(String tickerSymbol, Integer portfolioID) {
         this.tickerSymbol = tickerSymbol;

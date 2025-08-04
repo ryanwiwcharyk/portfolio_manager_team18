@@ -11,14 +11,9 @@ import java.io.IOException;
 @Component
 public class YahooFinanceClient {
 
-    public YahooFinanceAPIResponse fetchStockData(String symbol) {
+    public Stock fetchStockData(String symbol) {
         try {
-            Stock stock = YahooFinance.get(symbol);
-            return new YahooFinanceAPIResponse(
-                    stock.getSymbol(),
-                    stock.getQuote().getPrice(),
-                    stock.getQuote().getChange()
-            );
+            return YahooFinance.get(symbol);
         } catch (IOException e) {
             throw new RuntimeException(String.format("There was an issue fetching stock data for %s", symbol), e);
         }

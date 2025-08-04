@@ -1,5 +1,6 @@
 package com.portfoliomanager.team18.stock;
 
+import com.portfoliomanager.team18.api.client.YahooFinanceClient;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ public class StockService {
     private StockRepository stockRepo;
     @Autowired
     private PortfolioRepository portfolioRepo;
+    @Autowired
+    private YahooFinanceClient yahooFinanceClient;
 
     public List<Stock> getStockByPortfolioId(Integer id) {
         return stockRepo.findByPortfolioID(id);
@@ -45,11 +48,14 @@ public class StockService {
                     req.getPortfolioID() + ". Please use the update method.");
         }
 
+        yahoofinance.Stock yahooStock = yahooFinanceClient.fetchStockData(req.getTickerSymbol());
         Stock stock = new Stock();
         stock.setTickerSymbol(req.getTickerSymbol());
         stock.setPortfolioID(req.getPortfolioID());
         stock.setQty(req.getQty());
-        stock.setAvgPrice(req.getAvgPrice());
+        stock.setCurrentPrice(yahooStock.getQuote().getPrice());
+        stock.setAvgPrice(yahooStock.getQuote().getPriceAvg50());
+        stock.setChangePercent(yahooStock.getQuote().getChangeInPercent());
 
         return stockRepo.save(stock);
     }

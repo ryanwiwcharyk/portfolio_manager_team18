@@ -1,18 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { createPortfolio, getPortfolios, updatePortfolio, deletePortfolio } from '../../services/portfolioService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { formatter } from '../../constants/constants';
 import './Home.css';
 
 function Home() {
   const startingCash = 1000;
-  const formatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'CAD',
-  });
-
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showEditModal, setShowEditModal] = React.useState(false);
   const [portfolios, setPortfolios] = React.useState([]);
@@ -54,10 +50,7 @@ function Home() {
   }
 
   const handleOpenEditModal = (id) => {
-    console.log('Opening edit modal for portfolio ID:', id);
-    console.log('Current portfolios:', portfolios);
     setCurrentPortfolio(portfolios.find(p => p.portfolioID === id));
-    console.log('Current portfolio:', currentPortfolio);
     setShowEditModal(true);
   }
 
