@@ -1,5 +1,9 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
+import { getStocks } from '../../services/stockService';
+import { getPortfolioById } from '../../services/portfolioService';
 import './dashboard.css';
+import { get } from 'react-hook-form';
 
 // Mock data for demonstration
 const portfolioSummary = [
@@ -18,12 +22,21 @@ const portfolioHistory = [
 ];
 
 function Dashboard() {
+  const { id } = useParams();
+
   // Calculate max value for graph scaling
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
 
+  const [currentPortfolio, setCurrentPortfolio] = React.useState(null);
+
+  React.useEffect(() => {
+    setCurrentPortfolio(getPortfolioById(id));
+  }, [id]);
+
   return (
     <div className="dashboard-root">
-      <h1>Portfolio X Dashboard</h1>
+      <h1>{currentPortfolio.name}</h1>
+      <p>{currentPortfolio.description}</p>
       <div className="dashboard-actions-top">
         <button className="dashboard-action-btn">Buy</button>
         <button className="dashboard-action-btn">Sell</button>

@@ -41,8 +41,8 @@ function Home() {
     }
   }, [showEditModal, currentPortfolio, reset]);
 
-  const handlePortfolioClick = () => {
-    navigate('/dashboard');
+  const handlePortfolioClick = (id) => {
+    navigate(`/dashboard/${id}`);
   };
 
   const handleOpenCreateModal = () => {
@@ -105,7 +105,7 @@ function Home() {
           <div
             className="portfolio-square"
             key={portfolio.portfolioID}
-            onClick={handlePortfolioClick}
+            onClick={() => handlePortfolioClick(portfolio.portfolioID)}
             style={{ cursor: 'pointer' }}
           >
             <div className="portfolio-square-content">
