@@ -25,7 +25,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	// 3.15.0 is a commonly used version
-	implementation("com.yahoofinance-api:YahooFinanceAPI:3.15.0")
+	implementation("com.yahoofinance-api:YahooFinanceAPI:3.17.0")
 }
 
 tasks.withType<Test> {

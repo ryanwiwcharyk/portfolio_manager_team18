@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { getStocks, purchaseStock } from '../../services/stockService';
 import { getPortfolioById } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
+import { ToastContainer, toast } from 'react-toastify';
 import './dashboard.css';
 
 // // Mock data for demonstration
@@ -28,6 +29,7 @@ function Dashboard() {
   const [portfolio, setPortfolio] = React.useState(null);
   const [portfolioStocks, setPortfolioStocks] = React.useState([]);
   const [showBuyModal, setShowBuyModal] = React.useState(false);
+  const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
 
   React.useEffect(() => {
     const fetchPortfolio = async () => {
@@ -36,6 +38,7 @@ function Dashboard() {
         setPortfolio(response.data);
       } catch (error) {
         console.error('Failed to fetch portfolio:', error);
+        notify('Failed to fetch portfolio data: ' + error.message);
       }
     };
     fetchPortfolio();
@@ -48,7 +51,7 @@ function Dashboard() {
         setPortfolioStocks(response.data);
       }
       catch (error) {
-        console.error('Failed to fetch stocks:', error);
+        notify('Failed to fetch portfolio stocks: ' + error.message);
       }
     };
     fetchStocks();
@@ -58,19 +61,17 @@ function Dashboard() {
 
   const onPurchaseSubmit = async (data) => {
     try {
-      // Assuming data contains tickerSymbol and qty
       const purchaseData = {
         portfolioID: portfolio.portfolioID,
         tickerSymbol: data.tickerSymbol,
         qty: data.qty
       }
-      console.log('Purchase data:', purchaseData);
       const response = await purchaseStock(purchaseData);
       const newStock = response.data;
       setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
     }
     catch (error) {
-      console.error('Error purchasing stock:', error);
+      notify('Failed to purchase stock: ' + error.message);
     }
     finally {
       setShowBuyModal(false);
@@ -172,6 +173,7 @@ function Dashboard() {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
 
   );
