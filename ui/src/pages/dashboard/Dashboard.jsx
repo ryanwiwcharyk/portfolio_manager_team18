@@ -3,15 +3,14 @@ import { useParams } from 'react-router-dom';
 import { getStocks } from '../../services/stockService';
 import { getPortfolioById } from '../../services/portfolioService';
 import './dashboard.css';
-import { get } from 'react-hook-form';
 
-// Mock data for demonstration
-const portfolioSummary = [
-  { name: 'AAPL', value: 12000, avgPrice: 100, change: 2.3, shares: 30 },
-  { name: 'GOOGL', value: 8000, avgPrice: 800, change: -1.1, shares: 10 },
-  { name: 'TSLA', value: 5000, avgPrice: 900, change: 4.7, shares: 5 },
-  { name: 'AMZN', value: 3000, avgPrice: 1500, change: 0.5, shares: 2 },
-];
+// // Mock data for demonstration
+// const portfolioSummary = [
+//   { name: 'AAPL', value: 12000, avgPrice: 100, change: 2.3, shares: 30 },
+//   { name: 'GOOGL', value: 8000, avgPrice: 800, change: -1.1, shares: 10 },
+//   { name: 'TSLA', value: 5000, avgPrice: 900, change: 4.7, shares: 5 },
+//   { name: 'AMZN', value: 3000, avgPrice: 1500, change: 0.5, shares: 2 },
+// ];
 
 const portfolioHistory = [
   { date: '2024-06-01', value: 25000 },
@@ -23,22 +22,46 @@ const portfolioHistory = [
 
 function Dashboard() {
   const { id } = useParams();
+  const [portfolio, setPortfolio] = React.useState(null);
+  const [portfolioStocks, setPortfolioStocks] = React.useState([]);
 
+  React.useEffect(() => {
+      const fetchPortfolio = async () => {
+        try {
+          const response = await getPortfolioById(id);
+          setPortfolio(response.data);
+        } catch (error) {
+          console.error('Failed to fetch portfolio:', error);
+        }
+      };
+      fetchPortfolio();
+    }, [id]);
+
+  React.useEffect(() => {
+    const fetchStocks = async () => {
+      try {
+        const response = await getStocks(id);
+        setPortfolioStocks(response.data);
+      }
+      catch (error) {
+        console.error('Failed to fetch stocks:', error);
+      }
+    };
+    fetchStocks();
+  }, [id]);
   // Calculate max value for graph scaling
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
 
-  const [currentPortfolio, setCurrentPortfolio] = React.useState(null);
-
-  React.useEffect(() => {
-    setCurrentPortfolio(getPortfolioById(id));
-  }, [id]);
+  if (!portfolio) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="dashboard-root">
-      <h1>{currentPortfolio.name}</h1>
-      <p>{currentPortfolio.description}</p>
+      <h1>{portfolio.portfolioName}</h1>
+      <h3>{portfolio.description}</h3>
       <div className="dashboard-actions-top">
-        <button className="dashboard-action-btn">Buy</button>
+        <button className="dashboard-action-btn" >Buy</button>
         <button className="dashboard-action-btn">Sell</button>
       </div>
       <div className="dashboard-section">
@@ -74,7 +97,7 @@ function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {portfolioSummary.map(stock => (
+            {portfolioStocks.map(stock => (
               <tr key={stock.name}>
                 <td>{stock.name}</td>
                 <td>{stock.shares}</td>
