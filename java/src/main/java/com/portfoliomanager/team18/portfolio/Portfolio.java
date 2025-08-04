@@ -11,14 +11,16 @@ public class Portfolio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer portfolioID;
     private String portfolioName;
+    private String description;
     private BigDecimal cash;
 
     public Portfolio() {
     }
 
-    public Portfolio(Integer portfolioID, String portfolioName, BigDecimal cash) {
+    public Portfolio(Integer portfolioID, String portfolioName, String description, BigDecimal cash) {
         this.portfolioID = portfolioID;
         this.portfolioName = portfolioName;
+        this.description = description;
         this.cash = cash;
     }
 
@@ -37,6 +39,10 @@ public class Portfolio {
     public void setPortfolioName(String portfolioName) {
         this.portfolioName = portfolioName;
     }
+
+    public String getDescription() { return description;}
+
+    public void setDescription(String description) { this.description = description; }
 
     public BigDecimal getCash() {
         return cash;

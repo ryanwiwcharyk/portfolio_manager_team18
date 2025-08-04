@@ -4,10 +4,12 @@ import java.math.BigDecimal;
 
 public class NewPortfolioRequest {
     private String portfolioName;
+    private String description;
     private BigDecimal cash;
 
-    public NewPortfolioRequest(String portfolioName, BigDecimal cash) {
+    public NewPortfolioRequest(String portfolioName, String description, BigDecimal cash) {
         this.portfolioName = portfolioName;
+        this.description = description;
         this.cash = cash;
     }
 
@@ -17,6 +19,14 @@ public class NewPortfolioRequest {
 
     public void setPortfolioName(String portfolioName) {
         this.portfolioName = portfolioName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public BigDecimal getCash() {
@@ -31,6 +41,7 @@ public class NewPortfolioRequest {
     public String toString() {
         return "NewPortfolioRequest{" +
                 "portfolioName='" + portfolioName + '\'' +
+                ", description='" + description + '\'' +
                 ", cash=" + cash +
                 '}';
     }

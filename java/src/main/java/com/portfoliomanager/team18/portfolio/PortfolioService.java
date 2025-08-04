@@ -32,6 +32,7 @@ public class PortfolioService {
 
         Portfolio p = new Portfolio();
         p.setPortfolioName(req.getPortfolioName());
+        p.setDescription(req.getDescription());
         p.setCash(req.getCash());
         return portfolioRepo.save(p);
     }
@@ -44,6 +45,7 @@ public class PortfolioService {
 
         Portfolio p = existingPortfolio.get();
         p.setPortfolioName(req.getPortfolioName());
+        p.setDescription(req.getDescription());
         p.setCash(req.getCash());
 
         return portfolioRepo.save(p);
