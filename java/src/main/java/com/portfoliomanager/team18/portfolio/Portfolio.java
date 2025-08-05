@@ -12,12 +12,12 @@ public class Portfolio {
     private Integer portfolioID;
     private String portfolioName;
     private String description;
-    private BigDecimal cash;
+    private double cash;
 
     public Portfolio() {
     }
 
-    public Portfolio(Integer portfolioID, String portfolioName, String description, BigDecimal cash) {
+    public Portfolio(Integer portfolioID, String portfolioName, String description, double cash) {
         this.portfolioID = portfolioID;
         this.portfolioName = portfolioName;
         this.description = description;
@@ -44,11 +44,11 @@ public class Portfolio {
 
     public void setDescription(String description) { this.description = description; }
 
-    public BigDecimal getCash() {
+    public double getCash() {
         return cash;
     }
 
-    public void setCash(BigDecimal cash) {
+    public void setCash(double cash) {
         this.cash = cash;
     }
 }

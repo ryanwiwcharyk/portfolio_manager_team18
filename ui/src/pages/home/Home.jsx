@@ -1,32 +1,30 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { createPortfolio, getPortfolios, updatePortfolio, deletePortfolio } from '../../services/portfolioService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { formatter } from '../../constants/constants';
+import { ToastContainer, toast } from 'react-toastify';
 import './Home.css';
 
 function Home() {
   const startingCash = 1000;
-  const formatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'CAD',
-  });
-
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showEditModal, setShowEditModal] = React.useState(false);
   const [portfolios, setPortfolios] = React.useState([]);
   const [currentPortfolio, setCurrentPortfolio] = React.useState(null);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const navigate = useNavigate();
-
+  const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
+  
   React.useEffect(() => {
     const fetchPortfolios = async () => {
       try {
         const response = await getPortfolios();
         setPortfolios(response.data);
       } catch (error) {
-        console.error('Error fetching portfolios:', error);
+        notify('Failed to fetch portfolios: ' + error.message);
       }
     };
     fetchPortfolios();
@@ -41,8 +39,8 @@ function Home() {
     }
   }, [showEditModal, currentPortfolio, reset]);
 
-  const handlePortfolioClick = () => {
-    navigate('/dashboard');
+  const handlePortfolioClick = (id) => {
+    navigate(`/dashboard/${id}`);
   };
 
   const handleOpenCreateModal = () => {
@@ -54,10 +52,7 @@ function Home() {
   }
 
   const handleOpenEditModal = (id) => {
-    console.log('Opening edit modal for portfolio ID:', id);
-    console.log('Current portfolios:', portfolios);
     setCurrentPortfolio(portfolios.find(p => p.portfolioID === id));
-    console.log('Current portfolio:', currentPortfolio);
     setShowEditModal(true);
   }
 
@@ -73,7 +68,7 @@ function Home() {
       await deletePortfolio(id);
       setPortfolios(prev => prev.filter(p => p.portfolioID !== id));
     } catch (error) {
-      alert('Failed to delete portfolio');
+      notify('Failed to delete portfolio: ' + error.message);
     }
   };
 
@@ -105,7 +100,7 @@ function Home() {
           <div
             className="portfolio-square"
             key={portfolio.portfolioID}
-            onClick={handlePortfolioClick}
+            onClick={() => handlePortfolioClick(portfolio.portfolioID)}
             style={{ cursor: 'pointer' }}
           >
             <div className="portfolio-square-content">
@@ -168,7 +163,7 @@ function Home() {
           </div>
         </div>
       )}
-
+      <ToastContainer />
     </div>
   );
 }

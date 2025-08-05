@@ -1,5 +1,7 @@
 package com.portfoliomanager.team18.stock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +11,7 @@ import java.util.List;
 @RequestMapping("/api/stocks")
 @CrossOrigin
 public class StockController {
+    private final Logger logger = LoggerFactory.getLogger(StockController.class);
     @Autowired
     private StockService stockService;
 
@@ -23,7 +26,9 @@ public class StockController {
     }
 
     @PostMapping
-    public Stock create(@RequestBody NewStockRequest req) {
+    public NewStockDTO create(@RequestBody NewStockRequest req)
+    {
+        logger.info("Received request to purchase stock {}", req);
         return stockService.saveNewStockRequest(req);
     }
 

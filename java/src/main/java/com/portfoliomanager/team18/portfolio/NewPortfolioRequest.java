@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 public class NewPortfolioRequest {
     private String portfolioName;
     private String description;
-    private BigDecimal cash;
+    private double cash;
 
-    public NewPortfolioRequest(String portfolioName, String description, BigDecimal cash) {
+    public NewPortfolioRequest(String portfolioName, String description, double cash) {
         this.portfolioName = portfolioName;
         this.description = description;
         this.cash = cash;
@@ -29,11 +29,11 @@ public class NewPortfolioRequest {
         this.description = description;
     }
 
-    public BigDecimal getCash() {
+    public double getCash() {
         return cash;
     }
 
-    public void setCash(BigDecimal cash) {
+    public void setCash(double cash) {
         this.cash = cash;
     }
 

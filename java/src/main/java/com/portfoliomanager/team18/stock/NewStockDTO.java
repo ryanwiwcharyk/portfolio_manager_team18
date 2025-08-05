@@ -1,31 +1,24 @@
 package com.portfoliomanager.team18.stock;
 
-import jakarta.persistence.*;
-
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "stocks")
-@IdClass(StockId.class)
-public class Stock {
-    @Id
+public class NewStockDTO {
     private String tickerSymbol;
-    @Id
     private Integer portfolioID;
     private Integer qty;
     private double currentPrice;
     private double avgPrice;
     private double changePercent;
+    private double updatedCash;
 
-    public Stock() {}
+    public NewStockDTO() {}
 
-    public Stock(String tickerSymbol, Integer portfolioID, Integer qty, double currentPrice, double avgPrice, double changePercent) {
+    public NewStockDTO(String tickerSymbol, Integer portfolioID, Integer qty, double currentPrice, double avgPrice, double changePercent, double updatedCash) {
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
         this.qty = qty;
         this.currentPrice = currentPrice;
         this.avgPrice = avgPrice;
         this.changePercent = changePercent;
+        this.updatedCash = updatedCash;
     }
 
     public String getTickerSymbol() {
@@ -76,15 +69,24 @@ public class Stock {
         this.changePercent = changePercent;
     }
 
+    public double getUpdatedCash() {
+        return updatedCash;
+    }
+
+    public void setUpdatedCash(double updatedCash) {
+        this.updatedCash = updatedCash;
+    }
+
     @Override
     public String toString() {
-        return "Stock{" +
+        return "NewStockDTO{" +
                 "tickerSymbol='" + tickerSymbol + '\'' +
                 ", portfolioID=" + portfolioID +
                 ", qty=" + qty +
                 ", currentPrice=" + currentPrice +
                 ", avgPrice=" + avgPrice +
                 ", changePercent=" + changePercent +
+                ", updatedCash=" + updatedCash +
                 '}';
     }
 }
