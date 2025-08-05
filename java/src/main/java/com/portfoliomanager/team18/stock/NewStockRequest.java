@@ -1,8 +1,5 @@
 package com.portfoliomanager.team18.stock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 
 public class NewStockRequest {
@@ -14,7 +11,6 @@ public class NewStockRequest {
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
         this.qty = qty;
-
     }
 
     public String getTickerSymbol() {
