@@ -23,7 +23,7 @@ public class StockController {
     }
 
     @PostMapping
-    public Stock create(@RequestBody NewStockRequest req) {
+    public NewStockDTO create(@RequestBody NewStockRequest req) {
         return stockService.saveNewStockRequest(req);
     }
 

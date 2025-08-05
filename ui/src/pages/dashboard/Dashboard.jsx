@@ -63,6 +63,8 @@ function Dashboard() {
       }
       const response = await purchaseStock(purchaseData);
       const newStock = response.data;
+      portfolio.cash = response.data.cash;
+
       setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
     }
     catch (error) {
@@ -200,7 +202,7 @@ function Dashboard() {
                   }
                 })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4} />
               {errors.tickerSymbol && <span className='error-message'>{errors.tickerSymbol.message || "A ticker symbol is required"}</span>}
-              <label htmlFor="description">Quantity:</label>
+              <label htmlFor="quantity">Quantity:</label>
               <input {...register("qty", { required: true })} id="quantity" type="number"></input>
               {errors.qty && <span className='error-message'>{errors.qty.message || "A quantity is required"}</span>}
               <div className="button-row">

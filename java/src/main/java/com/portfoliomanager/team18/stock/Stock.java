@@ -13,13 +13,13 @@ public class Stock {
     @Id
     private Integer portfolioID;
     private Integer qty;
-    private BigDecimal currentPrice;
-    private BigDecimal avgPrice;
-    private BigDecimal changePercent;
+    private double currentPrice;
+    private double avgPrice;
+    private double changePercent;
 
     public Stock() {}
 
-    public Stock(String tickerSymbol, Integer portfolioID, Integer qty, BigDecimal currentPrice, BigDecimal avgPrice, BigDecimal changePercent) {
+    public Stock(String tickerSymbol, Integer portfolioID, Integer qty, double currentPrice, double avgPrice, double changePercent) {
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
         this.qty = qty;
@@ -52,27 +52,27 @@ public class Stock {
         this.qty = qty;
     }
 
-    public BigDecimal getCurrentPrice() {
+    public double getCurrentPrice() {
         return currentPrice;
     }
 
-    public void setCurrentPrice(BigDecimal currentPrice) {
+    public void setCurrentPrice(double currentPrice) {
         this.currentPrice = currentPrice;
     }
 
-    public BigDecimal getAvgPrice() {
+    public double getAvgPrice() {
         return avgPrice;
     }
 
-    public void setAvgPrice(BigDecimal avgPrice) {
+    public void setAvgPrice(double avgPrice) {
         this.avgPrice = avgPrice;
     }
 
-    public BigDecimal getChangePercent() {
+    public double getChangePercent() {
         return changePercent;
     }
 
-    public void setChangePercent(BigDecimal changePercent) {
+    public void setChangePercent(double changePercent) {
         this.changePercent = changePercent;
     }
 }

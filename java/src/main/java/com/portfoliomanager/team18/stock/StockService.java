@@ -2,6 +2,7 @@ package com.portfoliomanager.team18.stock;
 
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.timeseries.response.QuoteResponse;
+import com.portfoliomanager.team18.exception.InsufficientCashException;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class StockService {
                     .forSymbol(ticker)
                     .fetchSync();
             if (!Objects.equals(stock.getCurrentPrice(), BigDecimal.valueOf(quote.getPrice()))) {
-                stock.setCurrentPrice(BigDecimal.valueOf(quote.getPrice()));
+                stock.setCurrentPrice(quote.getPrice());
             }
         }
         stockRepo.saveAll(stocks);
@@ -46,7 +47,7 @@ public class StockService {
         return existingStock.get();
     }
 
-    public Stock saveNewStockRequest(NewStockRequest req) {
+    public NewStockDTO saveNewStockRequest(NewStockRequest req) {
         // Check if portfolio exists
         Optional<Portfolio> existingPortfolio = portfolioRepo.findById(req.getPortfolioID());
         if (existingPortfolio.isEmpty()) {
@@ -69,15 +70,31 @@ public class StockService {
                         .quote()
                         .forSymbol(req.getTickerSymbol())
                         .fetchSync();
+
+        //check if portfolio has enough cash to purchase
+        if (existingPortfolio.get().getCash() - quote.getPrice() * req.getQty() < 0)
+            throw new InsufficientCashException("Your portfolio does not have enough cash to purchase x" + req.getQty()
+                    + " of " + req.getTickerSymbol());
+
+        existingPortfolio.get().setCash(existingPortfolio.get().getCash() - quote.getPrice() * req.getQty());
+
         Stock stock = new Stock();
         stock.setTickerSymbol(req.getTickerSymbol());
         stock.setPortfolioID(req.getPortfolioID());
         stock.setQty(req.getQty());
-        stock.setCurrentPrice(BigDecimal.valueOf(quote.getPrice()));
-//      stock.setAvgPrice(yahooStock.getQuote().getPriceAvg50());
-        stock.setChangePercent(BigDecimal.valueOf(quote.getChangePercent()));
-
-        return stockRepo.save(stock);
+        stock.setCurrentPrice(quote.getPrice());
+        stock.setAvgPrice(0);
+        stock.setChangePercent(quote.getChangePercent());
+        stockRepo.save(stock);
+        return new NewStockDTO(
+                stock.getTickerSymbol(),
+                stock.getPortfolioID(),
+                stock.getQty(),
+                stock.getCurrentPrice(),
+                stock.getAvgPrice(),
+                stock.getChangePercent(),
+                existingPortfolio.get().getCash()
+        );
 
     }
 
@@ -91,13 +108,13 @@ public class StockService {
         Stock stock = existingStock.get();
         int newTotalQty = stock.getQty() + req.getQty();
 
-        BigDecimal newAvgPrice = calculateAveragePrice(
-                stock.getAvgPrice(), stock.getQty(),
-                req.getAvgPrice(), req.getQty()
-        );
-
-        stock.setQty(newTotalQty);
-        stock.setAvgPrice(newAvgPrice);
+//        double newAvgPrice = calculateAveragePrice(
+//                BigDecimal.valueOf(stock.getAvgPrice()), stock.getQty(),
+//                req.getAvgPrice(), req.getQty()
+//        );
+//
+//        stock.setQty(newTotalQty);
+//        stock.setAvgPrice(newAvgPrice);
 
         return stockRepo.save(stock);
     }

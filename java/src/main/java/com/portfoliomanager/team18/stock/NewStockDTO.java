@@ -1,28 +1,24 @@
 package com.portfoliomanager.team18.stock;
 
-import jakarta.persistence.Id;
-
-import java.math.BigDecimal;
-
 public class NewStockDTO {
     private String tickerSymbol;
     private Integer portfolioID;
     private Integer qty;
-    private BigDecimal currentPrice;
-    private BigDecimal avgPrice;
-    private BigDecimal changePercent;
-    private BigDecimal cash;
+    private double currentPrice;
+    private double avgPrice;
+    private double changePercent;
+    private double updatedCash;
 
     public NewStockDTO() {}
 
-    public NewStockDTO(String tickerSymbol, Integer portfolioID, Integer qty, BigDecimal currentPrice, BigDecimal avgPrice, BigDecimal changePercent, BigDecimal cash) {
+    public NewStockDTO(String tickerSymbol, Integer portfolioID, Integer qty, double currentPrice, double avgPrice, double changePercent, double updatedCash) {
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
         this.qty = qty;
         this.currentPrice = currentPrice;
         this.avgPrice = avgPrice;
         this.changePercent = changePercent;
-        this.cash = cash;
+        this.updatedCash = updatedCash;
     }
 
     public String getTickerSymbol() {
@@ -49,35 +45,35 @@ public class NewStockDTO {
         this.qty = qty;
     }
 
-    public BigDecimal getCurrentPrice() {
+    public double getCurrentPrice() {
         return currentPrice;
     }
 
-    public void setCurrentPrice(BigDecimal currentPrice) {
+    public void setCurrentPrice(double currentPrice) {
         this.currentPrice = currentPrice;
     }
 
-    public BigDecimal getAvgPrice() {
+    public double getAvgPrice() {
         return avgPrice;
     }
 
-    public void setAvgPrice(BigDecimal avgPrice) {
+    public void setAvgPrice(double avgPrice) {
         this.avgPrice = avgPrice;
     }
 
-    public BigDecimal getChangePercent() {
+    public double getChangePercent() {
         return changePercent;
     }
 
-    public void setChangePercent(BigDecimal changePercent) {
+    public void setChangePercent(double changePercent) {
         this.changePercent = changePercent;
     }
 
-    public BigDecimal getCash() {
-        return cash;
+    public double getUpdatedCash() {
+        return updatedCash;
     }
 
-    public void setCash(BigDecimal cash) {
-        this.cash = cash;
+    public void setUpdatedCash(double updatedCash) {
+        this.updatedCash = updatedCash;
     }
 }
