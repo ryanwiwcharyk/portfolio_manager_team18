@@ -96,10 +96,18 @@ function Home() {
 
   return (
     <div className="home-root">
-      <h1>Team 18 Portfolio Manager</h1>
-      <div className="button-container">
-        <button onClick={handleOpenCreateModal}><h3>Add Portfolio</h3></button>
+      <h1>Hi, <span>We're Team 18,</span></h1>
+      <h2>Welcome to our Portfolio Manager</h2>
+      <p>Our portfolio manager web application designed to help users manage their stock investments efficiently. It allows users to create and organize multiple portfolios, track cash balances, and maintain detailed descriptions for each portfolio. With an intuitive interface and simple controls, users can easily add, edit, and delete portfolios and stocks, making it ideal for individual investors or students learning about portfolio management.
+      </p>    
+      <div className="button-wrapper">
+        <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Add Portfolio</button>
+        <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Search Portfolio</button>
       </div>
+
+      
+
+
       <div className="portfolio-container">
         {portfolios.map((portfolio) => (
           <div

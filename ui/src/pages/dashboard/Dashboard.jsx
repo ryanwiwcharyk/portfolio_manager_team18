@@ -28,6 +28,7 @@ function Dashboard() {
         <button className="dashboard-action-btn">Buy</button>
         <button className="dashboard-action-btn">Sell</button>
       </div>
+      
       <div className="dashboard-section">
         <h2>Portfolio Value Over Time</h2>
         {/* Simple SVG Line Graph */}
@@ -36,7 +37,11 @@ function Dashboard() {
             fill="none"
             stroke="#002B51"
             strokeWidth="3"
-            points={portfolioHistory.map((h, i) => `${i * 100},${120 - (h.value / maxHistoryValue) * 100}`).join(' ')}
+            points={portfolioHistory.map((h, i) => {
+              const x = (i / (portfolioHistory.length - 1)) * 400;
+              const y = 120 - (h.value / maxHistoryValue) * 100;
+              return `${x},${y}`;
+            }).join(' ')}
           />
           {portfolioHistory.map((h, i) => (
             <circle key={h.date} cx={i * 100} cy={120 - (h.value / maxHistoryValue) * 100} r="4" fill="#2d3748" />
@@ -48,6 +53,7 @@ function Dashboard() {
           ))}
         </div>
       </div>
+
       <div className="dashboard-section">
         <h2>Portfolio Holdings</h2>
         <table className="dashboard-table">
