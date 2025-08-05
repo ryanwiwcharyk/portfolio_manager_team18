@@ -5,6 +5,8 @@ import com.crazzyghost.alphavantage.timeseries.response.QuoteResponse;
 import com.portfoliomanager.team18.exception.InsufficientCashException;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import java.util.Optional;
 
 @Service
 public class StockService {
+    private final Logger logger = LoggerFactory.getLogger(StockService.class);
     @Autowired
     private StockRepository stockRepo;
     @Autowired
@@ -70,9 +73,14 @@ public class StockService {
                         .quote()
                         .forSymbol(req.getTickerSymbol())
                         .fetchSync();
-
+        logger.info("Received stock quote from AlphaVantage API:" +
+                "Symbol: {}" +
+                "Price: {}," +
+                "Change %: {}", quote.getSymbol(), quote.getPrice(), quote.getChangePercent());
         //check if portfolio has enough cash to purchase
-        if (existingPortfolio.get().getCash() - quote.getPrice() * req.getQty() < 0)
+        logger.debug("User wants {} x{}", req.getTickerSymbol(), req.getQty());
+        logger.debug("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (quote.getPrice() * req.getQty()));
+        if (existingPortfolio.get().getCash() - (quote.getPrice() * req.getQty()) < 0)
             throw new InsufficientCashException("Your portfolio does not have enough cash to purchase x" + req.getQty()
                     + " of " + req.getTickerSymbol());
 
@@ -85,8 +93,10 @@ public class StockService {
         stock.setCurrentPrice(quote.getPrice());
         stock.setAvgPrice(0);
         stock.setChangePercent(quote.getChangePercent());
+        logger.debug("Saving stock: {}", stock);
         stockRepo.save(stock);
-        return new NewStockDTO(
+
+        NewStockDTO stockDTO = new NewStockDTO(
                 stock.getTickerSymbol(),
                 stock.getPortfolioID(),
                 stock.getQty(),
@@ -95,6 +105,8 @@ public class StockService {
                 stock.getChangePercent(),
                 existingPortfolio.get().getCash()
         );
+        logger.debug("Returning stock dto to client: {}", stockDTO);
+        return stockDTO;
 
     }
 

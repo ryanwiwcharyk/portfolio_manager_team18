@@ -75,4 +75,16 @@ public class Stock {
     public void setChangePercent(double changePercent) {
         this.changePercent = changePercent;
     }
+
+    @Override
+    public String toString() {
+        return "Stock{" +
+                "tickerSymbol='" + tickerSymbol + '\'' +
+                ", portfolioID=" + portfolioID +
+                ", qty=" + qty +
+                ", currentPrice=" + currentPrice +
+                ", avgPrice=" + avgPrice +
+                ", changePercent=" + changePercent +
+                '}';
+    }
 }

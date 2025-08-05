@@ -76,4 +76,17 @@ public class NewStockDTO {
     public void setUpdatedCash(double updatedCash) {
         this.updatedCash = updatedCash;
     }
+
+    @Override
+    public String toString() {
+        return "NewStockDTO{" +
+                "tickerSymbol='" + tickerSymbol + '\'' +
+                ", portfolioID=" + portfolioID +
+                ", qty=" + qty +
+                ", currentPrice=" + currentPrice +
+                ", avgPrice=" + avgPrice +
+                ", changePercent=" + changePercent +
+                ", updatedCash=" + updatedCash +
+                '}';
+    }
 }
