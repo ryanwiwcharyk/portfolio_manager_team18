@@ -20,22 +20,29 @@
 }
 
 .dashboard-section h2 {
-  margin-top: 0;
+  margin: 0;
   color: #002B51;
   font-size: 1.3rem;
-}
-
-.dashboard-section h3 {
-  margin-top: 0;
-  color: #002B51;
-  font-size: 1.1rem;
 }
 
 .dashboard-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+}
+
+.dashboard-section-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dashboard-section-subtext {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-bottom: 0;
+  margin-left: 2px;
 }
 
 .dashboard-graph {

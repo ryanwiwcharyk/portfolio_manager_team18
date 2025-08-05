@@ -15,13 +15,15 @@ java {
 
 repositories {
 	mavenCentral()
-}
+	maven { url = uri("https://www.jitpack.io" ) }}
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("com.github.crazzyghost:alphavantage-java:1.7.0")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	implementation("me.paulschwarz:spring-dotenv:4.0.0")
+	implementation("io.github.cdimascio:dotenv-java:3.2.0")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	// 3.15.0 is a commonly used version

@@ -5,6 +5,8 @@ import { getStocks, purchaseStock } from '../../services/stockService';
 import { getPortfolioById } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import './dashboard.css';
 
 const portfolioHistory = [
@@ -16,11 +18,15 @@ const portfolioHistory = [
 ];
 
 function Dashboard() {
+  // Calculate max value for graph scaling
+  const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { id } = useParams();
   const [portfolio, setPortfolio] = React.useState(null);
   const [portfolioStocks, setPortfolioStocks] = React.useState([]);
   const [showBuyModal, setShowBuyModal] = React.useState(false);
+  const [showSellModal, setShowSellModal] = React.useState(false);
+  const [selectedStock, setSelectedStock] = React.useState(null);
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
 
   React.useEffect(() => {
@@ -47,8 +53,6 @@ function Dashboard() {
     };
     fetchStocks();
   }, [id]);
-  // Calculate max value for graph scaling
-  const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
 
   const onPurchaseSubmit = async (data) => {
     try {
@@ -69,6 +73,19 @@ function Dashboard() {
     }
   }
 
+  const onSellSubmit = async (data) => {
+    try {
+      // Replace with your sellStock service call
+      // Example: await sellStock({ portfolioID: portfolio.portfolioID, tickerSymbol: selectedStock.tickerSymbol, qty: data.qty });
+      notify(`Sold ${data.qty} shares of ${selectedStock.tickerSymbol}`);
+      // Optionally update portfolioStocks here
+    } catch (error) {
+      notify('Failed to sell stock: ' + error.message);
+    } finally {
+      handleCloseSellModal();
+    }
+  };
+
   const handleOpenBuyModal = () => {
     setShowBuyModal(true);
   }
@@ -76,6 +93,17 @@ function Dashboard() {
   const handleCloseBuyModal = () => {
     setShowBuyModal(false);
   }
+
+  const handleOpenSellModal = (stock) => {
+    setSelectedStock(stock);
+    setShowSellModal(true);
+  };
+
+  const handleCloseSellModal = () => {
+    setShowSellModal(false);
+    setSelectedStock(null);
+  };
+
 
   if (!portfolio) {
     return <div>Loading...</div>;
@@ -111,7 +139,10 @@ function Dashboard() {
       </div>
       <div className="dashboard-section">
         <div className="dashboard-section-header">
-          <h2>Portfolio Holdings</h2>
+          <div className="dashboard-section-title-group">
+            <h2>Portfolio Holdings</h2>
+            <p className="dashboard-section-subtext">As of previous market close</p>
+          </div>
           <h2>Portfolio Cash: {formatter.format(portfolio.cash)}</h2>
         </div>
         <table className="dashboard-table">
@@ -122,6 +153,7 @@ function Dashboard() {
               <th>Avg Price ($)</th>
               <th>Value ($)</th>
               <th>Change (%)</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -130,8 +162,23 @@ function Dashboard() {
                 <td>{stock.tickerSymbol}</td>
                 <td>{stock.qty}</td>
                 <td>{stock.avgPrice}</td>
-                {/* <td>{stock.value.toLocaleString()}</td>
-                <td style={{ color: stock.change >= 0 ? 'green' : 'red' }}>{stock.change}</td> */}
+                <td>{stock.currentPrice}</td>
+                <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
+                 <td>
+                  <button
+                    onClick={() => handleOpenSellModal(stock)}
+                    className="dashboard-action-btn"
+                    title="Sell"
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                  <button
+                    className="dashboard-action-btn"
+                    title="Edit"
+                  >
+                    <FontAwesomeIcon icon={faPenToSquare} />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -151,7 +198,7 @@ function Dashboard() {
                     value: /^[A-Za-z]{1,4}$/,
                     message: "Ticker must be 1-4 letters"
                   }
-                })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4}/>
+                })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4} />
               {errors.tickerSymbol && <span className='error-message'>{errors.tickerSymbol.message || "A ticker symbol is required"}</span>}
               <label htmlFor="description">Quantity:</label>
               <input {...register("qty", { required: true })} id="quantity" type="number"></input>
@@ -159,6 +206,48 @@ function Dashboard() {
               <div className="button-row">
                 <button type="submit">Purchase</button>
                 <button type="button" onClick={handleCloseBuyModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+       {showSellModal && selectedStock && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>
+              Sell Stock <FontAwesomeIcon icon={faTrash} />
+            </h2>
+            <form className="form-control" onSubmit={handleSubmit(onSellSubmit)}>
+              <label htmlFor="sell-ticker">Ticker Symbol:</label>
+              <input
+                id="sell-ticker"
+                type="text"
+                value={selectedStock.tickerSymbol}
+                disabled
+                style={{ background: "#f3f4f6" }}
+              />
+              <label htmlFor="sell-qty">Quantity to Sell:</label>
+              <input
+                {...register("qty", {
+                  required: true,
+                  min: 1,
+                  max: selectedStock.qty,
+                  valueAsNumber: true,
+                })}
+                id="sell-qty"
+                type="number"
+                min={1}
+                max={selectedStock.qty}
+                placeholder={`Max: ${selectedStock.qty}`}
+              />
+              {errors.qty && (
+                <span className="error-message">
+                  {errors.qty.message || `Enter a value between 1 and ${selectedStock.qty}`}
+                </span>
+              )}
+              <div className="button-row">
+                <button type="submit">Sell</button>
+                <button type="button" onClick={handleCloseSellModal}>Cancel</button>
               </div>
             </form>
           </div>

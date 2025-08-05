@@ -1,6 +1,7 @@
 package com.portfoliomanager.team18.stock;
 
-import com.portfoliomanager.team18.api.client.YahooFinanceClient;
+import com.crazzyghost.alphavantage.AlphaVantage;
+import com.crazzyghost.alphavantage.timeseries.response.QuoteResponse;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -16,11 +18,23 @@ public class StockService {
     private StockRepository stockRepo;
     @Autowired
     private PortfolioRepository portfolioRepo;
-    @Autowired
-    private YahooFinanceClient yahooFinanceClient;
 
     public List<Stock> getStockByPortfolioId(Integer id) {
-        return stockRepo.findByPortfolioID(id);
+        List<Stock> stocks = stockRepo.findByPortfolioID(id);
+        for (Stock stock : stocks) {
+            String ticker = stock.getTickerSymbol();
+            QuoteResponse quote = AlphaVantage
+                    .api()
+                    .timeSeries()
+                    .quote()
+                    .forSymbol(ticker)
+                    .fetchSync();
+            if (!Objects.equals(stock.getCurrentPrice(), BigDecimal.valueOf(quote.getPrice()))) {
+                stock.setCurrentPrice(BigDecimal.valueOf(quote.getPrice()));
+            }
+        }
+        stockRepo.saveAll(stocks);
+        return stocks;
     }
 
     public Stock getStockByTickerAndPortfolioId(String ticker, Integer portfolioID) {
@@ -48,16 +62,23 @@ public class StockService {
                     req.getPortfolioID() + ". Please use the update method.");
         }
 
-        yahoofinance.Stock yahooStock = yahooFinanceClient.fetchStockData(req.getTickerSymbol());
+        QuoteResponse quote =
+                AlphaVantage
+                        .api()
+                        .timeSeries()
+                        .quote()
+                        .forSymbol(req.getTickerSymbol())
+                        .fetchSync();
         Stock stock = new Stock();
         stock.setTickerSymbol(req.getTickerSymbol());
         stock.setPortfolioID(req.getPortfolioID());
         stock.setQty(req.getQty());
-        stock.setCurrentPrice(yahooStock.getQuote().getPrice());
-        stock.setAvgPrice(yahooStock.getQuote().getPriceAvg50());
-        stock.setChangePercent(yahooStock.getQuote().getChangeInPercent());
+        stock.setCurrentPrice(BigDecimal.valueOf(quote.getPrice()));
+//      stock.setAvgPrice(yahooStock.getQuote().getPriceAvg50());
+        stock.setChangePercent(BigDecimal.valueOf(quote.getChangePercent()));
 
         return stockRepo.save(stock);
+
     }
 
     public Stock updateStockRequest(String ticker, Integer portfolioID, UpdateStockRequest req) {
