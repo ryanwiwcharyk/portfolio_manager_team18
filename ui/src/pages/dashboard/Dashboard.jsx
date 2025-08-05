@@ -65,7 +65,7 @@ function Dashboard() {
       setError(null);
       
       try {
-        const response = await getTransactionsByPortfolioId(1);
+        const response = await getTransactionsByPortfolioId(id);
         
         const data = response.data;
         const sortedData = data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
