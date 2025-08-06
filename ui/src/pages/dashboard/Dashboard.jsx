@@ -160,32 +160,45 @@ function Dashboard() {
         <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
         <button className="dashboard-action-btn">Sell</button>
       </div>
-      
       <div className="dashboard-section">
         <h2>Portfolio Value Over Time</h2>
-        {/* Simple SVG Line Graph */}
-        <svg width="100%" height="120" viewBox="0 0 400 120" className="dashboard-graph">
-          <polyline
-            fill="none"
-            stroke="#002B51"
-            strokeWidth="3"
-            points={portfolioHistory.map((h, i) => {
-              const x = (i / (portfolioHistory.length - 1)) * 400;
+        {/* SVG Line Graph */}
+        <div className="graph-container">
+          <svg width="600" height="110" className="dashboard-graph">
+            {/* Line */}
+            <polyline
+              fill="none"
+              stroke="#e3e7edff"
+              strokeWidth="3"
+              points={portfolioHistory.map((h, i) => {
+                const padding = 10;
+                const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
+                const y = 120 - (h.value / maxHistoryValue) * 100;
+                return `${x},${y}`;
+              }).join(' ')}
+            />
+            {/* Dots */}
+            {portfolioHistory.map((h, i) => {
+              const padding = 10;
+              const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
               const y = 120 - (h.value / maxHistoryValue) * 100;
-              return `${x},${y}`;
-            }).join(' ')}
-          />
-          {portfolioHistory.map((h, i) => (
-            <circle key={h.date} cx={i * 100} cy={120 - (h.value / maxHistoryValue) * 100} r="4" fill="#2d3748" />
-          ))}
-        </svg>
-        <div className="dashboard-graph-labels">
-          {portfolioHistory.map((h, i) => (
-            <span key={h.date}>{h.date.slice(5)}</span>
-          ))}
+              return <circle key={h.date} cx={x} cy={y} r="4" fill="#e3e7edff" />;
+            })}
+          </svg>
+          {/* Labels */}
+          <div className="dashboard-graph-labels">
+            {portfolioHistory.map((h, i) => {
+              const padding = 10;
+              const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
+              return (
+                <span key={h.date} style={{ left: `${x}px` }}>
+                  {h.date.slice(5)}
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
-
       <div className="dashboard-section">
         <div className="dashboard-section-header">
           <div className="dashboard-section-title-group">

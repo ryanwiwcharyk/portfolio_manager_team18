@@ -99,10 +99,6 @@ function Home() {
         <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Add Portfolio</button>
         <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Search Portfolio</button>
       </div>
-
-      
-
-
       <div className="portfolio-container">
         {portfolios.map((portfolio) => (
           <div
@@ -130,7 +126,6 @@ function Home() {
                 </button>
               </div>
             </div>
-
           </div>
         ))}
       </div>
@@ -152,7 +147,6 @@ function Home() {
           </div>
         </div>
       )}
-
       {showEditModal && (
         <div className="modal-backdrop">
           <div className="modal">
