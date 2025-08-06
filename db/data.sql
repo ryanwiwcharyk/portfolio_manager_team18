@@ -7,6 +7,13 @@ SET SQL_SAFE_UPDATES = 0;
 DELETE FROM transactions;
 DELETE FROM stocks;
 DELETE FROM portfolios;
+DROP TABLE stock_data;
+CREATE TABLE stock_data (
+    id SERIAL PRIMARY KEY,     -- Auto-incrementing primary key
+    ticker_symbol VARCHAR(10),        -- Symbol column, e.g., "IBM"
+    price DECIMAL(10, 4),      -- Price column, with up to 10 digits and 4 decimal places
+    change_percent DECIMAL(10,4) -- Change percent, e.g., "-0.5199%"
+);
 
 -- RE-ENABLE SAFE UPDATES
 SET SQL_SAFE_UPDATES = 1;
@@ -74,4 +81,38 @@ INSERT INTO transactions (ticker_symbol, portfolioid, price, qty, is_sell, trans
 ('GOOGL', 1, 125.00, 10, TRUE, '2024-03-25 11:45:00'),
 ('NVDA', 3, 520.00, 5, TRUE, '2024-03-18 15:30:00'),
 ('TSLA', 3, 230.00, 5, TRUE, '2024-03-21 09:20:00');
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('IBM', 250.6700, -0.5199);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('AAPL', 202.9200, -0.2115);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('MSFT', 527.7500, -1.4730);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('GOOGL', 194.6700, -0.1897);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('NVDA', 178.2600, -0.9667);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('TSLA', 308.7200, -0.1746);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('META', 763.4600, -1.6629);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('NFLX', 1147.8700, -1.9744);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('AMD', 174.3100, -1.3972);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('AMZN', 213.7500, 0.9922);
+
+INSERT INTO stock_data (ticker_symbol, price, change_percent)
+VALUES ('INTC', 20.1900, 3.5385);
+
 

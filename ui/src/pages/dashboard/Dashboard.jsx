@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { getStocks, purchaseStock } from '../../services/stockService';
+import { set, useForm } from 'react-hook-form';
+import { getStocks, purchaseStock, sellStock } from '../../services/stockService';
 import { getPortfolioById } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
@@ -25,7 +25,7 @@ function Dashboard() {
   const [error, setError] = useState(null);
   
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const { id } = useParams();
   const [portfolio, setPortfolio] = useState(null);
   const [portfolioStocks, setPortfolioStocks] = useState([]);
@@ -33,6 +33,10 @@ function Dashboard() {
   const [showSellModal, setShowSellModal] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
+    const qtyValue = watch("qty");
+      React.useEffect(() => {
+    console.log("Current qty value:", qtyValue);
+  }, [qtyValue]);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -50,7 +54,7 @@ function Dashboard() {
     const fetchStocks = async () => {
       try {
         const response = await getStocks(id);
-        setPortfolioStocks(response.data);
+        setPortfolioStocks(response.data || []);
       }
       catch (error) {
         notify('Failed to fetch portfolio stocks: ' + error.message);
@@ -79,7 +83,7 @@ function Dashboard() {
     };
 
     fetchTransactions();
-  }, []);
+  }, [id]);
 
   const onPurchaseSubmit = async (data) => {
     try {
@@ -90,7 +94,8 @@ function Dashboard() {
       }
       const response = await purchaseStock(purchaseData);
       const newStock = response.data;
-      portfolio.cash = response.data.cash;
+      console.log('request', response.data)
+      portfolio.cash = response.data.updatedCash;
 
       setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
     }
@@ -98,16 +103,23 @@ function Dashboard() {
       notify('Failed to purchase stock: ' + error.message);
     }
     finally {
-      setShowBuyModal(false);
+      handleCloseBuyModal();
     }
   }
 
   const onSellSubmit = async (data) => {
     try {
-      // Replace with your sellStock service call
-      // Example: await sellStock({ portfolioID: portfolio.portfolioID, tickerSymbol: selectedStock.tickerSymbol, qty: data.qty });
-      notify(`Sold ${data.qty} shares of ${selectedStock.tickerSymbol}`);
-      // Optionally update portfolioStocks here
+      console.log('Selling stock:', data);
+      const requestData = {
+        portfolioID: portfolio.portfolioID,
+        tickerSymbol: selectedStock.tickerSymbol,
+        qty: data.qty
+      };
+      const response = await sellStock(requestData);
+      portfolio.cash = portfolio.cash + response.data.updatedCash;
+      
+      const stocksResponse = await getStocks(portfolio.portfolioID);
+      setPortfolioStocks(stocksResponse.data || []);
     } catch (error) {
       notify('Failed to sell stock: ' + error.message);
     } finally {
@@ -200,30 +212,38 @@ function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {portfolioStocks.map(stock => (
-              <tr key={stock.tickerSymbol}>
-                <td>{stock.tickerSymbol}</td>
-                <td>{stock.qty}</td>
-                <td>{stock.avgPrice}</td>
-                <td>{stock.currentPrice}</td>
-                <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
-                 <td>
-                  <button
-                    onClick={() => handleOpenSellModal(stock)}
-                    className="dashboard-action-btn"
-                    title="Sell"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                  <button
-                    className="dashboard-action-btn"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faPenToSquare} />
-                  </button>
+            {portfolioStocks && portfolioStocks.length > 0 ? (
+              portfolioStocks.map(stock => (
+                <tr key={stock.tickerSymbol}>
+                  <td>{stock.tickerSymbol.toUpperCase()}</td>
+                  <td>{stock.qty}</td>
+                  <td>{stock.avgPrice}</td>
+                  <td>{stock.currentPrice}</td>
+                  <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
+                   <td>
+                    <button
+                      onClick={() => handleOpenSellModal(stock)}
+                      className="dashboard-action-btn"
+                      title="Sell"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                    <button
+                      className="dashboard-action-btn"
+                      title="Edit"
+                    >
+                      <FontAwesomeIcon icon={faPenToSquare} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No stocks in your portfolio. Click the "Buy" button to add some stocks!
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -241,10 +261,17 @@ function Dashboard() {
                     value: /^[A-Za-z]{1,4}$/,
                     message: "Ticker must be 1-4 letters"
                   }
-                })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4} />
+                })} 
+                id="ticker-symbol" 
+                type="text" 
+                placeholder="ex: AAPL, MSFT..." 
+                maxLength={4}
+                style={{ textTransform: 'uppercase' }}
+                onInput={(e) => e.target.value = e.target.value.toUpperCase()}
+              />
               {errors.tickerSymbol && <span className='error-message'>{errors.tickerSymbol.message || "A ticker symbol is required"}</span>}
               <label htmlFor="quantity">Quantity:</label>
-              <input {...register("qty", { required: true })} id="quantity" type="number"></input>
+              <input {...register("qty", { required: true, valueAsNumber: true })} id="quantity" type="number"></input>
               {errors.qty && <span className='error-message'>{errors.qty.message || "A quantity is required"}</span>}
               <div className="button-row">
                 <button type="submit">Purchase</button>
