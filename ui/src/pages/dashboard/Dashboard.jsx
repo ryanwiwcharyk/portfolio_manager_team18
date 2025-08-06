@@ -40,7 +40,7 @@ function Dashboard() {
         const response = await getPortfolioById(id);
         setPortfolio(response.data);
       } catch (error) {
-        notify('Failed to fetch portfolio data: ' + error.message);
+        notify('Failed to fetch portfolio data: ' + error.response.data.errorMessage);
       }
     };
     fetchPortfolio();
@@ -53,7 +53,7 @@ function Dashboard() {
         setPortfolioStocks(response.data || []);
       }
       catch (error) {
-        notify('Failed to fetch portfolio stocks: ' + error.message);
+        notify('Failed to fetch portfolio stocks: ' + error.response.data.errorMessage);
       }
     };
     fetchStocks();
@@ -71,7 +71,7 @@ function Dashboard() {
         const sortedData = data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
         setTransactions(sortedData);
       } catch (err) {
-        notify('Failed to fetch portfolio transactions: ' + error.message);
+        notify('Failed to fetch portfolio transactions: ' + err.response.data.errorMessage);
       } finally {
         setLoading(false);
       }
@@ -115,7 +115,7 @@ function Dashboard() {
       const stocksResponse = await getStocks(portfolio.portfolioID);
       setPortfolioStocks(stocksResponse.data || []);
     } catch (error) {
-      notify('Failed to sell stock: ' + error.message);
+      notify('Failed to sell stock: ' + error.response.data.errorMessage);
     } finally {
       handleCloseSellModal();
     }
