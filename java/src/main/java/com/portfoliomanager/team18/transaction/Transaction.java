@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.*;
 
 @Entity
 @Table(name = "transactions")
@@ -16,18 +17,18 @@ public class Transaction {
 
     private Integer portfolioID;
 
-    private BigDecimal price;
+    private Double price;
 
     private Integer qty;
 
     private Boolean isSell;
 
-    private Timestamp transactionTime;
+    private ZonedDateTime transactionTime;
 
     public Transaction() {
     }
 
-    public Transaction(Integer transactionID, String tickerSymbol, Integer portfolioID, BigDecimal price, Integer qty, Boolean isSell, Timestamp transactionTime) {
+    public Transaction(Integer transactionID, String tickerSymbol, Integer portfolioID, Double price, Integer qty, Boolean isSell, ZonedDateTime transactionTime) {
         this.transactionID = transactionID;
         this.tickerSymbol = tickerSymbol;
         this.portfolioID = portfolioID;
@@ -61,11 +62,11 @@ public class Transaction {
         this.portfolioID = portfolioID;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -85,11 +86,11 @@ public class Transaction {
         isSell = sell;
     }
 
-    public Timestamp getTransactionTime() {
+    public ZonedDateTime getTransactionTime() {
         return transactionTime;
     }
 
-    public void setTransactionTime(Timestamp transactionTime) {
+    public void setTransactionTime(ZonedDateTime transactionTime) {
         this.transactionTime = transactionTime;
     }
 }
