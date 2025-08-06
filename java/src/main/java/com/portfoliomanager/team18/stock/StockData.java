@@ -8,6 +8,7 @@ public class StockData {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;  // Assuming the table has a primary key column 'id'
 
     @Column(name = "ticker_symbol")

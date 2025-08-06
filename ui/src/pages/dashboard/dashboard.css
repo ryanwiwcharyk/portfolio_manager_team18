@@ -73,6 +73,10 @@
   align-items: flex-start;
 }
 
+.dashboard-section-title-group h2 {
+  margin: 0;
+}
+
 .dashboard-section-subtext {
   font-size: 0.9rem;
   color: #6b7280;
