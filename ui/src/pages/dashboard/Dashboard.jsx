@@ -521,8 +521,29 @@ function Dashboard() {
 
   return (
     <div className="dashboard-root">
-      <h1>{portfolio.portfolioName}</h1>
-      <h3>{portfolio.description}</h3>
+      <div className="dashboard-header">
+        <button 
+          className="dashboard-back-btn"
+          onClick={() => window.location.href = '/'}
+          style={{
+            background: 'none',
+            border: '1px solid #ccc',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#666',
+            fontSize: '14px'
+          }}
+        >
+          ← Go Back
+        </button>
+        <h1>{portfolio.portfolioName}</h1>
+        <h3>{portfolio.description}</h3>
+      </div>
       
       {/* Tab Navigation */}
       <div className="dashboard-tabs">
