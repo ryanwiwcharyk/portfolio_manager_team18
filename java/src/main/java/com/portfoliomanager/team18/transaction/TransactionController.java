@@ -1,6 +1,7 @@
 package com.portfoliomanager.team18.transaction;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,8 +14,9 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @GetMapping("/{portfolioID}")
-    public List<Transaction> getByPortfolioID(@PathVariable Integer portfolioID) {
-        return transactionService.getByPortfolioID(portfolioID);
+    public ResponseEntity<List<Transaction>> getByPortfolioID(@PathVariable Integer portfolioID) {
+        List<Transaction> transactionList = transactionService.getByPortfolioID(portfolioID);
+        return ResponseEntity.ok(transactionList);
     }
 
 }
