@@ -1,5 +1,6 @@
 package com.portfoliomanager.team18.portfolio;
 
+import com.portfoliomanager.team18.stock.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,8 @@ import java.util.Optional;
 public class PortfolioService {
     @Autowired
     private PortfolioRepository portfolioRepo;
+    @Autowired
+    private StockRepository stockRepository;
 
     public List<Portfolio> getAllPortfolio() {
         return portfolioRepo.findAll();
@@ -58,5 +61,6 @@ public class PortfolioService {
         }
 
         portfolioRepo.deleteById(id);
+        stockRepository.deleteAllByPortfolioID(id);
     }
 }

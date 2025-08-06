@@ -25,7 +25,7 @@ function Dashboard() {
   const [error, setError] = useState(null);
   
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm();
   const { id } = useParams();
   const [portfolio, setPortfolio] = useState(null);
   const [portfolioStocks, setPortfolioStocks] = useState([]);
@@ -109,18 +109,32 @@ function Dashboard() {
 
   const onSellSubmit = async (data) => {
     try {
-      console.log('Selling stock:', data);
+      console.log('=== SELL STOCK DEBUG ===');
+      console.log('Form data received:', data);
+      console.log('Selected stock:', selectedStock);
+      console.log('Portfolio ID:', portfolio.portfolioID);
+      
       const requestData = {
         portfolioID: portfolio.portfolioID,
         tickerSymbol: selectedStock.tickerSymbol,
         qty: data.qty
       };
+      
+      console.log('Request data being sent to backend:', requestData);
+      console.log('Quantity being sold:', data.qty, 'Type:', typeof data.qty);
+      console.log('Available quantity:', selectedStock.qty, 'Type:', typeof selectedStock.qty);
+      
       const response = await sellStock(requestData);
+      console.log('Sell response:', response.data);
+      
       portfolio.cash = portfolio.cash + response.data.updatedCash;
       
+      console.log('Fetching updated stocks...');
       const stocksResponse = await getStocks(portfolio.portfolioID);
+      console.log('Updated stocks response:', stocksResponse.data);
       setPortfolioStocks(stocksResponse.data || []);
     } catch (error) {
+      console.error('Sell error:', error);
       notify('Failed to sell stock: ' + error.message);
     } finally {
       handleCloseSellModal();
@@ -149,16 +163,19 @@ function Dashboard() {
 
   const handleCloseBuyModal = () => {
     setShowBuyModal(false);
+    reset(); // Reset form when closing
   }
 
   const handleOpenSellModal = (stock) => {
     setSelectedStock(stock);
+    reset(); // Reset form when opening
     setShowSellModal(true);
   };
 
   const handleCloseSellModal = () => {
     setShowSellModal(false);
     setSelectedStock(null);
+    reset(); // Reset form when closing
   };
 
 

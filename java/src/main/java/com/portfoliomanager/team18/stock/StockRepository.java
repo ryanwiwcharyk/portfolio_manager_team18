@@ -15,13 +15,6 @@ public interface StockRepository extends JpaRepository<Stock, StockId> {
     Optional<Portfolio> findByTickerSymbol(String portfolioName);
     @Modifying
     @Transactional
-    @Query("UPDATE Stock s SET s.qty = :quantity WHERE s.portfolioID = :portfolioId AND s.tickerSymbol = :tickerSymbol")
-    void sellPartialStock(@Param("portfolioId") Integer portfolioId,
-                         @Param("tickerSymbol") String tickerSymbol,
-                         @Param("quantity") Integer quantity);
-//    @Modifying
-//    @Transactional
-//    @Query("DELETE FROM stocks s WHERE s.portfolioid = :portfolioId AND s.ticker_symbol = :tickerSymbol")
-//    void sellAllStock(@Param("portfolioId") Long portfolioId,
-//                      @Param("tickerSymbol") String tickerSymbol);
+    @Query("DELETE FROM Stock s WHERE s.portfolioID = :portfolioID")
+    void deleteAllByPortfolioID(Integer portfolioID);
 }

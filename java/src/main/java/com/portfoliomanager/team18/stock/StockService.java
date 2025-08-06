@@ -26,22 +26,7 @@ public class StockService {
     private StockDataRepository stockDataRepository;
 
     public List<Stock> getStockByPortfolioId(Integer id) {
-        List<Stock> stocks = stockRepo.findByPortfolioID(id);
-        for (Stock stock : stocks) {
-            String ticker = stock.getTickerSymbol();
-            StockData stockData = stockDataRepository.findByTickerSymbol(ticker);
-            QuoteResponse quote = AlphaVantage
-                    .api()
-                    .timeSeries()
-                    .quote()
-                    .forSymbol(ticker)
-                    .fetchSync();
-            if (!Objects.equals(stock.getCurrentPrice(), BigDecimal.valueOf(quote.getPrice()))) {
-                stock.setCurrentPrice(quote.getPrice());
-            }
-        }
-        stockRepo.saveAll(stocks);
-        return stocks;
+        return stockRepo.findByPortfolioID(id);
     }
 
     public Stock getStockByTickerAndPortfolioId(String ticker, Integer portfolioID) {
@@ -69,13 +54,7 @@ public class StockService {
                     req.getPortfolioID() + ". Please use the update method.");
         }
         StockData stockData = stockDataRepository.findByTickerSymbol(req.getTickerSymbol());
-//        QuoteResponse quote =
-//                AlphaVantage
-//                        .api()
-//                        .timeSeries()
-//                        .quote()
-//                        .forSymbol(req.getTickerSymbol())
-//                        .fetchSync();
+
         logger.info("Received stock quote from DB:" +
                 "Symbol: {}" +
                 "Price: {}," +
@@ -157,7 +136,6 @@ public class StockService {
         } else {
             stock.setQty(req.getQty());
             stockRepo.save(stock);
-            //stockRepo.sellPartialStock(req.getPortfolioID(), req.getTickerSymbol(), req.getQty());
         }
         return profit;
     }
