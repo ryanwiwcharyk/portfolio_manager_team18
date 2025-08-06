@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { set, useForm } from 'react-hook-form';
 import { getStocks, purchaseStock, sellStock } from '../../services/stockService';
+import { getTransactionsByPortfolioId } from '../../services/transactionService';
 import { getPortfolioById } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-import { getTransactionsByPortfolioId } from '../../services/portfolioService';
+import { formatISOToDateTime } from '../../formatters/dateFormmater';
 import './dashboard.css';
 
 const portfolioHistory = [
@@ -33,10 +34,6 @@ function Dashboard() {
   const [showSellModal, setShowSellModal] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
-    const qtyValue = watch("qty");
-      React.useEffect(() => {
-    console.log("Current qty value:", qtyValue);
-  }, [qtyValue]);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -83,7 +80,7 @@ function Dashboard() {
     };
 
     fetchTransactions();
-  }, [id]);
+  }, [id, activeTab]);
 
   const onPurchaseSubmit = async (data) => {
     try {
@@ -109,32 +106,18 @@ function Dashboard() {
 
   const onSellSubmit = async (data) => {
     try {
-      console.log('=== SELL STOCK DEBUG ===');
-      console.log('Form data received:', data);
-      console.log('Selected stock:', selectedStock);
-      console.log('Portfolio ID:', portfolio.portfolioID);
-      
-      const requestData = {
+        const requestData = {
         portfolioID: portfolio.portfolioID,
         tickerSymbol: selectedStock.tickerSymbol,
         qty: data.qty
       };
       
-      console.log('Request data being sent to backend:', requestData);
-      console.log('Quantity being sold:', data.qty, 'Type:', typeof data.qty);
-      console.log('Available quantity:', selectedStock.qty, 'Type:', typeof selectedStock.qty);
-      
-      const response = await sellStock(requestData);
-      console.log('Sell response:', response.data);
-      
+      const response = await sellStock(requestData);      
       portfolio.cash = portfolio.cash + response.data.updatedCash;
       
-      console.log('Fetching updated stocks...');
       const stocksResponse = await getStocks(portfolio.portfolioID);
-      console.log('Updated stocks response:', stocksResponse.data);
       setPortfolioStocks(stocksResponse.data || []);
     } catch (error) {
-      console.error('Sell error:', error);
       notify('Failed to sell stock: ' + error.message);
     } finally {
       handleCloseSellModal();
@@ -142,7 +125,7 @@ function Dashboard() {
   };
 
   const formatTransaction = (transaction) => {
-    const date = new Date(transaction.transactionTime).toLocaleDateString();
+    const date = formatISOToDateTime(transaction.transactionTime);
     const type = transaction.sell === true ? 'SELL' : 'BUY';
     const total = (transaction.price * transaction.qty).toFixed(2);
     

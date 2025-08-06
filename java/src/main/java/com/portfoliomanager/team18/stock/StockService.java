@@ -5,12 +5,17 @@ import com.crazzyghost.alphavantage.timeseries.response.QuoteResponse;
 import com.portfoliomanager.team18.exception.InsufficientCashException;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
+import com.portfoliomanager.team18.transaction.Transaction;
+import com.portfoliomanager.team18.transaction.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,6 +29,8 @@ public class StockService {
     private PortfolioRepository portfolioRepo;
     @Autowired
     private StockDataRepository stockDataRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public List<Stock> getStockByPortfolioId(Integer id) {
         return stockRepo.findByPortfolioID(id);
@@ -44,7 +51,7 @@ public class StockService {
         if (existingPortfolio.isEmpty()) {
             throw new IllegalArgumentException("Portfolio with ID " + req.getPortfolioID() + " does not exist.");
         }
-
+        Portfolio portfolio = existingPortfolio.get();
         StockId stockId = new StockId(req.getTickerSymbol(), req.getPortfolioID());
 
         // Check if stock already exists
@@ -77,6 +84,15 @@ public class StockService {
         stock.setChangePercent(stockData.getChangePercent());
         logger.debug("Saving stock: {}", stock);
         stockRepo.save(stock);
+
+        Transaction transaction = new Transaction();
+        transaction.setPortfolioID(portfolio.getPortfolioID());
+        transaction.setTickerSymbol(stockData.getTickerSymbol());
+        transaction.setPrice(stockData.getPrice());
+        transaction.setQty(req.getQty());
+        transaction.setSell(false);
+        transaction.setTransactionTime(ZonedDateTime.now(ZoneId.systemDefault()));
+        transactionRepository.save(transaction);
 
         NewStockDTO stockDTO = new NewStockDTO(
                 stock.getTickerSymbol(),
@@ -134,9 +150,17 @@ public class StockService {
         if (req.getQty().equals(stock.getQty())) {
             stockRepo.deleteById(new StockId(req.getTickerSymbol(), req.getPortfolioID()));
         } else {
-            stock.setQty(req.getQty());
+            stock.setQty(stock.getQty() - req.getQty());
             stockRepo.save(stock);
         }
+        Transaction transaction = new Transaction();
+        transaction.setPortfolioID(portfolio.getPortfolioID());
+        transaction.setTickerSymbol(stock.getTickerSymbol());
+        transaction.setPrice(stock.getCurrentPrice());
+        transaction.setQty(req.getQty());
+        transaction.setSell(true);
+        transaction.setTransactionTime(ZonedDateTime.now(ZoneId.systemDefault()));
+        transactionRepository.save(transaction);
         return profit;
     }
 
