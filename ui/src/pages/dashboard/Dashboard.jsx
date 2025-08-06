@@ -11,6 +11,21 @@ import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { formatISOToDateTime } from '../../formatters/dateFormmater';
 import './dashboard.css';
 
+// Add spinner animation styles
+const spinnerStyle = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Inject styles into head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = spinnerStyle;
+  document.head.appendChild(styleElement);
+}
+
 const portfolioHistory = [
   { date: '2024-06-01', value: 25000 },
   { date: '2024-06-02', value: 25500 },
@@ -24,6 +39,8 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [portfolioError, setPortfolioError] = useState(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm();
   const { id } = useParams();
@@ -36,11 +53,21 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchPortfolio = async () => {
+      setPortfolioLoading(true);
+      setPortfolioError(null);
       try {
         const response = await getPortfolioById(id);
         setPortfolio(response.data);
       } catch (error) {
-        notify('Failed to fetch portfolio data: ' + error.response.data.errorMessage);
+        if (error.response?.status === 404) {
+          setPortfolioError('Portfolio not found. The portfolio you\'re looking for doesn\'t exist or may have been deleted.');
+        } else if (error.response?.status === 403) {
+          setPortfolioError('Access denied. You don\'t have permission to view this portfolio.');
+        } else {
+          setPortfolioError('Failed to load portfolio. Please check your connection and try again.');
+        }
+      } finally {
+        setPortfolioLoading(false);
       }
     };
     fetchPortfolio();
@@ -159,8 +186,90 @@ function Dashboard() {
   };
 
 
+  // Handle portfolio loading and error states
+  if (portfolioLoading) {
+    return (
+      <div className="dashboard-root">
+        <div className="loading-container" style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          flexDirection: 'column'
+        }}>
+          <div className="loading-spinner" style={{ 
+            border: '4px solid #f3f4f6',
+            borderTop: '4px solid #002B51',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '20px'
+          }}></div>
+          <p>Loading portfolio...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError) {
+    return (
+      <div className="dashboard-root">
+        <div className="error-container" style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          flexDirection: 'column',
+          textAlign: 'center',
+          padding: '20px'
+        }}>
+          <div style={{ 
+            fontSize: '64px', 
+            marginBottom: '20px',
+            color: '#e53e3e'
+          }}>⚠️</div>
+          <h2 style={{ color: '#e53e3e', marginBottom: '10px' }}>Portfolio Not Found</h2>
+          <p style={{ 
+            color: '#666', 
+            marginBottom: '20px',
+            maxWidth: '400px',
+            lineHeight: '1.5'
+          }}>
+            {portfolioError}
+          </p>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className="dashboard-action-btn"
+              onClick={() => window.history.back()}
+            >
+              Go Back
+            </button>
+            <button 
+              className="dashboard-action-btn"
+              onClick={() => window.location.href = '/'}
+            >
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!portfolio) {
-    return <div>Loading...</div>;
+    return (
+      <div className="dashboard-root">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh'
+        }}>
+          <p>No portfolio data available.</p>
+        </div>
+      </div>
+    );
   }
 
   const renderDashboardTab = () => (
