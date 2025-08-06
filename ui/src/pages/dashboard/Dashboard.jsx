@@ -72,8 +72,7 @@ function Dashboard() {
         const sortedData = data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
         setTransactions(sortedData);
       } catch (err) {
-        console.error('Error fetching transactions:', err);
-        setError('Failed to load transactions. Please check if the backend is running.');
+        notify('Failed to fetch portfolio transactions: ' + error.message);
       } finally {
         setLoading(false);
       }
