@@ -24,7 +24,6 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm();
   const { id } = useParams();
@@ -90,7 +89,6 @@ function Dashboard() {
       }
       const response = await purchaseStock(purchaseData);
       const newStock = response.data;
-      console.log('request', response.data)
       portfolio.cash = response.data.updatedCash;
 
       setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
@@ -224,7 +222,7 @@ function Dashboard() {
               <th>Stock</th>
               <th>Shares</th>
               <th>Avg Price ($)</th>
-              <th>Value ($)</th>
+              <th>Price Per Share ($)</th>
               <th>Change (%)</th>
               <th>Actions</th>
             </tr>
@@ -239,6 +237,7 @@ function Dashboard() {
                   <td>{stock.currentPrice}</td>
                   <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
                    <td>
+                    <div className="dashboard-action-btn-group">
                     <button
                       onClick={() => handleOpenSellModal(stock)}
                       className="dashboard-action-btn"
@@ -252,7 +251,9 @@ function Dashboard() {
                     >
                       <FontAwesomeIcon icon={faPenToSquare} />
                     </button>
+                    </div>
                   </td>
+
                 </tr>
               ))
             ) : (

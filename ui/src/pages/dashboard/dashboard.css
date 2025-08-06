@@ -206,4 +206,9 @@
   box-shadow: 0 4px 12px rgba(23, 135, 172, 0.3);
 }
 
+.dashboard-action-btn-group {
+  display: inline-flex;
+  gap: 8px;
+}
+
 
