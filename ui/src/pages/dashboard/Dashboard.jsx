@@ -94,7 +94,7 @@ function Dashboard() {
       setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
     }
     catch (error) {
-      notify('Failed to purchase stock: ' + error.message);
+      notify('Failed to purchase stock: ' + error.response.data.errorMessage);
     }
     finally {
       handleCloseBuyModal();
