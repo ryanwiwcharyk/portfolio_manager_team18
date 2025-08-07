@@ -26,3 +26,10 @@ CREATE TABLE IF NOT EXISTS transactions (
     transactionTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (portfolioID) REFERENCES portfolios(portfolioID) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS stock_data (
+    id SERIAL PRIMARY KEY,
+    ticker_symbol VARCHAR(10),
+    price DECIMAL(10, 4),
+    change_percent DECIMAL(10,4)
+);

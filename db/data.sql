@@ -8,12 +8,6 @@ DELETE FROM transactions;
 DELETE FROM stocks;
 DELETE FROM portfolios;
 DROP TABLE stock_data;
-CREATE TABLE stock_data (
-    id SERIAL PRIMARY KEY,     -- Auto-incrementing primary key
-    ticker_symbol VARCHAR(10),        -- Symbol column, e.g., "IBM"
-    price DECIMAL(10, 4),      -- Price column, with up to 10 digits and 4 decimal places
-    change_percent DECIMAL(10,4) -- Change percent, e.g., "-0.5199%"
-);
 
 -- RE-ENABLE SAFE UPDATES
 SET SQL_SAFE_UPDATES = 1;
