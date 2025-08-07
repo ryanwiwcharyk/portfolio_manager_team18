@@ -4,13 +4,6 @@
   padding: 32px 16px;
 }
 
-.dashboard-root h3 {
-  text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 16px;
-  color: #2d3748;
-}
-
 /* Tab Navigation Styles */
 .dashboard-tabs {
   display: flex;
@@ -56,48 +49,93 @@
 }
 
 .dashboard-section h2 {
-  margin: 0;
+  margin-top: 0;
   color: #002B51;
   font-size: 1.3rem;
 }
 
+/* Pie Chart Styles */
+.pie-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  min-height: 250px;
+}
+
+.pie-chart {
+  max-width: 200px;
+  height: auto;
+}
+
+.pie-chart-legend {
+  margin-top: 20px;
+}
+
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 4px solid transparent;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.legend-name {
+  font-weight: 600;
+  color: #002B51;
+  font-size: 0.9rem;
+}
+
+.legend-value {
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.legend-percentage {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Dashboard Section Header */
 .dashboard-section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
-.dashboard-section-title-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.dashboard-section-title-group h2 {
+  margin-bottom: 4px;
 }
 
 .dashboard-section-subtext {
-  font-size: 0.9rem;
+  margin: 0;
   color: #6b7280;
-  margin-top: 2px;
-  margin-bottom: 0;
-  margin-left: 2px;
-}
-
-.dashboard-graph {
-  margin-top: 12px;
-  margin-bottom: 8px;
-  background: #f8fafc;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  display: block;
-}
-
-.dashboard-graph-labels {
-  display: flex;
-  justify-content: space-between;
-  max-width: 400px;
-  margin: 0 auto;
-  font-size: 0.95rem;
-  color: #4b5563;
+  font-size: 0.9rem;
 }
 
 .dashboard-table {
@@ -186,6 +224,13 @@
 }
 
 .dashboard-actions-top {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  justify-content: flex-end;
+}
+
+.dashboard-actions-bottom {
   display: flex;
   gap: 12px;
   margin-bottom: 24px;

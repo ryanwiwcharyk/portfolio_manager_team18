@@ -32,6 +32,11 @@ public class PortfolioController {
         return portfolioService.updatePortfolioRequest(id, req);
     }
 
+    @PutMapping("/{id}/updateCash")
+    public Portfolio updatePortfolio(@PathVariable Integer id, @RequestBody Double cash) {
+        return portfolioService.updateCash(id, cash);
+    }
+
     @DeleteMapping("/{id}")
     public void deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);
