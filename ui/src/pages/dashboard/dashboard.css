@@ -61,6 +61,30 @@
   font-size: 1.3rem;
 }
 
+.dashboard-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-section-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dashboard-section-title-group h2 {
+  margin: 0;
+}
+
+.dashboard-section-subtext {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-bottom: 0;
+  margin-left: 2px;
+}
+
 /* Pie Chart Styles */
 .pie-chart-container {
   display: flex;

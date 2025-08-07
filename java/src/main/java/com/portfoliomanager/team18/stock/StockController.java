@@ -56,11 +56,7 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
-//    @DeleteMapping
-//    public void delete(@RequestBody SellStockRequest req) {
-//        logger.info("Received request to sell {} shares of {}", req.getNumberOfShares(), req.getTickerSymbol());
-//        stockService.deleteStockById(ticker, portfolioID);
-//    }
+
     @DeleteMapping("/{portfolioID}/{ticker}")
     public ResponseEntity<Void> delete(@PathVariable Integer portfolioID, @PathVariable String ticker) {
         stockService.deleteStockById(ticker, portfolioID);
