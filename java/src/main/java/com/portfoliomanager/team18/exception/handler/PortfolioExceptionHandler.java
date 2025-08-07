@@ -4,6 +4,7 @@ import com.portfoliomanager.team18.exception.InsufficientCashException;
 import com.portfoliomanager.team18.exception.PortfolioIllegalArgumentException;
 import com.portfoliomanager.team18.exception.StockIllegalArgumentException;
 import jdk.jfr.Experimental;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class PortfolioExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({PortfolioIllegalArgumentException.class})
-    protected ResponseEntity<Map<String, Object>> handlePortfolioIllegalArgumentException(IllegalArgumentException ex) {
+    protected ResponseEntity<Map<String, Object>> handlePortfolioIllegalArgumentException(PortfolioIllegalArgumentException ex) {
         Map<String, Object> response = Map.of(
                 "errorMessage", ex.getMessage()
         );
@@ -34,11 +35,27 @@ public class PortfolioExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({StockIllegalArgumentException.class})
-    protected ResponseEntity<Map<String, Object>> handleStockIllegalArgumentException(IllegalArgumentException ex) {
+    protected ResponseEntity<Map<String, Object>> handleStockIllegalArgumentException(StockIllegalArgumentException ex) {
         Map<String, Object> response = Map.of(
                 "errorMessage", ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(response);
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    protected ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, Object> response = Map.of(
+                "errorMessage", ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(response);
+    }
+
+    @ExceptionHandler({DataAccessException.class})
+    protected ResponseEntity<Map<String, Object>> handleDataAccessException(DataAccessException ex) {
+        Map<String, Object> response = Map.of(
+                "errorMessage", ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(response);
     }
 }
 

@@ -24,7 +24,7 @@ function Home() {
         const response = await getPortfolios();
         setPortfolios(response.data);
       } catch (error) {
-        notify('Failed to fetch portfolios: ' + error.message);
+        notify('Failed to fetch portfolios: ' + error.response.data.errorMessage);
       }
     };
     fetchPortfolios();
@@ -68,7 +68,7 @@ function Home() {
       await deletePortfolio(id);
       setPortfolios(prev => prev.filter(p => p.portfolioID !== id));
     } catch (error) {
-      notify('Failed to delete portfolio: ' + error.message);
+      notify('Failed to delete portfolio: ' + error.response.data.errorMessage);
     }
   };
 
@@ -79,7 +79,7 @@ function Home() {
       const newPortfolio = response.data;
       setPortfolios(prev => [...prev, newPortfolio]);
     } catch (error) {
-      notify('Failed to create portfolio: ' + error.message);
+      notify('Failed to create portfolio: ' + error.response.data.errorMessage);
     }
     finally {
       setShowCreateModal(false);
@@ -87,12 +87,18 @@ function Home() {
   }
 
   const onEditSubmit = async (data) => {
-    const updatedPortfolio = { ...currentPortfolio, ...data };
-    const response = await updatePortfolio(updatedPortfolio.portfolioID, updatedPortfolio);
-    const updatedData = response.data;
-    setPortfolios(prev => prev.map(p => p.portfolioID === updatedData.portfolioID ? updatedData : p));
-    setCurrentPortfolio(null);
-    setShowEditModal(false);
+    try {
+      const updatedPortfolio = { ...currentPortfolio, ...data };
+      const response = await updatePortfolio(updatedPortfolio.portfolioID, updatedPortfolio);
+      const updatedData = response.data;
+      setPortfolios(prev => prev.map(p => p.portfolioID === updatedData.portfolioID ? updatedData : p));
+    } catch (error) {
+      notify('Failed to update portfolio: ' + error.response.data.errorMessage);
+    } finally {
+      setCurrentPortfolio(null);
+      setShowEditModal(false);
+
+    }
   }
 
   return (

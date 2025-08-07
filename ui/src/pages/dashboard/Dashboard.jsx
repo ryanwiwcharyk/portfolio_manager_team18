@@ -558,7 +558,7 @@ function Dashboard() {
                 <tr key={`${stock.tickerSymbol}-${stock.qty}-${stock.avgPrice}-${index}`}>
                   <td>{stock.tickerSymbol.toUpperCase()}</td>
                   <td>{stock.qty}</td>
-                  <td>{stock.avgPrice}</td>
+                  <td>{parseFloat(stock.avgPrice).toFixed(2)}</td>
                   <td>{stock.currentPrice}</td>
                   <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
                    <td>
