@@ -542,6 +542,10 @@ function Dashboard() {
             <h2 style={{ color: realizedP >= 0 ? 'limegreen' : 'tomato' }}>
               Realized {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(realizedP))}
             </h2>
+            <h2 style={{ color: (unrealizedP + realizedP) >= 0 ? 'limegreen' : 'tomato' }}>
+              Total {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(unrealizedP + realizedP))}
+            </h2>
+            
           </div>
         </div>
         <div className="pie-chart-legend">
