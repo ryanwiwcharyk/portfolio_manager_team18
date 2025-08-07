@@ -406,6 +406,13 @@ function Dashboard() {
     );
   };
 
+  const getInvestedAmount = () => {
+    return transactions
+      .filter(tx => !tx.sell) // Only BUY transactions
+      .reduce((sum, tx) => sum + (tx.price * tx.qty), 0);
+  };
+
+
   // Render pie chart legend
   const renderPieChartLegend = () => {
     const allocation = getPortfolioAllocation();
@@ -441,6 +448,62 @@ function Dashboard() {
     );
   }
 
+  const getTotalPortfolioValue = () => {
+  if (!portfolio || !portfolioStocks) return 0;
+  const stockValue = portfolioStocks.reduce((total, stock) => total + (stock.qty * stock.currentPrice), 0);
+  return portfolio.cash + stockValue - 1000;
+};
+
+  const getUnrealizedPnL = () => {
+    if (!portfolioStocks || portfolioStocks.length === 0) return 0;
+
+    return portfolioStocks.reduce((sum, stock) => {
+      const marketValue = stock.currentPrice * stock.qty;
+      const costBasis = stock.avgPrice * stock.qty;
+      return sum + (marketValue - costBasis);
+    }, 0);
+  };
+
+  const getRealizedPnL = () => {
+  if (!transactions || transactions.length === 0) return 0;
+
+  let realizedPnL = 0;
+  const costBasis = {};
+
+  // Sort transactions oldest to newest
+  const sorted = [...transactions].sort((a, b) => new Date(a.transactionTime) - new Date(b.transactionTime));
+
+  for (const tx of sorted) {
+    const ticker = tx.tickerSymbol;
+    const qty = tx.qty;
+    const price = tx.price;
+
+    if (!costBasis[ticker]) {
+      costBasis[ticker] = { totalQty: 0, totalCost: 0 };
+    }
+
+    if (!tx.sell) {
+      costBasis[ticker].totalQty += qty;
+      costBasis[ticker].totalCost += price * qty;
+    } else {
+      const { totalQty, totalCost } = costBasis[ticker];
+
+      if (totalQty === 0) continue;
+
+      const avgCost = totalCost / totalQty;
+      const pnl = (price - avgCost) * qty;
+      realizedPnL += pnl;
+
+      costBasis[ticker].totalQty -= qty;
+      costBasis[ticker].totalCost -= avgCost * qty;
+    }
+  }
+
+  return realizedPnL;
+};
+
+
+
   const renderDashboardTab = () => (
     <>
         <div className="dashboard-actions-top">
@@ -450,6 +513,19 @@ function Dashboard() {
       </div>
       <div className="dashboard-section">
         <h2>Portfolio Allocation</h2>
+        <div className="portfolio-summary">
+          <h2>
+            Portfolio Value: {formatter.format(getTotalPortfolioValue())}
+          </h2>
+          <h4 style={{ marginLeft: '1rem', color: getUnrealizedPnL() >= 0 ? 'limegreen' : 'tomato' }}>
+            Unrealized {getUnrealizedPnL() >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(getUnrealizedPnL()))}
+          </h4>
+          <h2 style={{ marginLeft: '1rem', color: getRealizedPnL() >= 0 ? 'limegreen' : 'tomato' }}>
+            Realized {getRealizedPnL() >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(getRealizedPnL()))}
+          </h2>
+
+          
+        </div>
         <div className="pie-chart-container">
           {renderPieChart()}
         </div>
