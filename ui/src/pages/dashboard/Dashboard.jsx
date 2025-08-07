@@ -107,6 +107,15 @@ function Dashboard() {
     fetchTransactions();
   }, [id, activeTab]);
 
+  const refreshStocks = async () => {
+    try {
+      const response = await getStocks(id);
+      setPortfolioStocks(response.data || []);
+    } catch (error) {
+      console.error('Failed to refresh stocks:', error);
+    }
+  };
+
   const onPurchaseSubmit = async (data) => {
     try {
       const purchaseData = {
@@ -115,10 +124,10 @@ function Dashboard() {
         qty: data.qty
       }
       const response = await purchaseStock(purchaseData);
-      const newStock = response.data;
       portfolio.cash = response.data.updatedCash;
 
-      setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
+      // Refresh stocks from server to ensure we have the latest data
+      await refreshStocks();
     }
     catch (error) {
       notify('Failed to purchase stock: ' + error.response.data.errorMessage);
@@ -338,8 +347,8 @@ function Dashboard() {
           </thead>
           <tbody>
             {portfolioStocks && portfolioStocks.length > 0 ? (
-              portfolioStocks.map(stock => (
-                <tr key={stock.tickerSymbol}>
+              portfolioStocks.map((stock, index) => (
+                <tr key={`${stock.tickerSymbol}-${stock.qty}-${stock.avgPrice}-${index}`}>
                   <td>{stock.tickerSymbol.toUpperCase()}</td>
                   <td>{stock.qty}</td>
                   <td>{stock.avgPrice}</td>
@@ -353,12 +362,6 @@ function Dashboard() {
                       title="Sell"
                     >
                       <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                    <button
-                      className="dashboard-action-btn"
-                      title="Edit"
-                    >
-                      <FontAwesomeIcon icon={faPenToSquare} />
                     </button>
                     </div>
                   </td>
