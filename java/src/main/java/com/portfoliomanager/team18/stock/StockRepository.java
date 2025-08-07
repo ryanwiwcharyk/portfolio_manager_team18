@@ -14,8 +14,9 @@ public interface StockRepository extends JpaRepository<Stock, StockId> {
     List<Stock> findByPortfolioID(Integer portfolioID);
     Optional<Portfolio> findByTickerSymbol(String portfolioName);
     @Modifying
+    @Transactional
     @Query("UPDATE Stock s SET s.currentPrice = (SELECT sd.price FROM StockData sd WHERE sd.tickerSymbol = s.tickerSymbol) WHERE s.portfolioID = :portfolioId AND s.currentPrice != (SELECT sd.price FROM StockData sd WHERE sd.tickerSymbol = s.tickerSymbol)")
-    int updateOutdatedStockPrices(@Param("portfolioId") Integer portfolioId);
+    void updateOutdatedStockPrices(@Param("portfolioId") Integer portfolioId);
     @Modifying
     @Transactional
     @Query("DELETE FROM Stock s WHERE s.portfolioID = :portfolioID")
