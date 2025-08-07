@@ -1,9 +1,18 @@
 package com.portfoliomanager.team18.portfolio;
 
+import com.portfoliomanager.team18.transaction.Transaction;
+import com.portfoliomanager.team18.transaction.TransactionRepository;
+import com.portfoliomanager.team18.stock.StockRepository;
+
 import com.portfoliomanager.team18.exception.PortfolioIllegalArgumentException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +20,11 @@ import java.util.Optional;
 public class PortfolioService {
     @Autowired
     private PortfolioRepository portfolioRepo;
+
+    @Autowired
+    private TransactionRepository transactionRepo;
+    @Autowired
+    private StockRepository stockRepository;
 
     public List<Portfolio> getAllPortfolio() {
         return portfolioRepo.findAll();
@@ -44,12 +58,42 @@ public class PortfolioService {
             throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
         }
 
+        if (portfolioRepo.findByPortfolioName(req.getPortfolioName()).isPresent()) {
+            throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
+        }
+
         Portfolio p = existingPortfolio.get();
         p.setPortfolioName(req.getPortfolioName());
         p.setDescription(req.getDescription());
         p.setCash(req.getCash());
 
         return portfolioRepo.save(p);
+    }
+
+    public Portfolio updateCash(Integer id, Double cash) {
+        Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
+        if (existingPortfolio.isEmpty()) {
+            throw new IllegalArgumentException("Portfolio doesn't exist.");
+        }
+
+        Portfolio p = existingPortfolio.get();
+        if (p.getCash() < Math.abs(cash) && cash < 0){
+            throw new IllegalArgumentException("Cannot withdraw more than current portfolio cash value of");
+        }
+        p.setCash(p.getCash() + cash);
+        Portfolio updated = portfolioRepo.save(p);
+
+        // Record the cash transaction
+        Transaction cashTransaction = new Transaction();
+        cashTransaction.setTickerSymbol(cash < 0 ? "WITHDRAW" : "DEPOSIT");
+        cashTransaction.setPortfolioID(id);
+        cashTransaction.setPrice((Math.abs(cash)));
+        cashTransaction.setQty(1);
+        cashTransaction.setSell(cash < 0); // true if withdraw, false if deposit
+        cashTransaction.setTransactionTime(ZonedDateTime.now(ZoneId.systemDefault()));
+        transactionRepo.save(cashTransaction);
+
+        return updated;
     }
 
     public void deletePortfolioById(Integer id) {
@@ -59,5 +103,6 @@ public class PortfolioService {
         }
 
         portfolioRepo.deleteById(id);
+        stockRepository.deleteAllByPortfolioID(id);
     }
 }

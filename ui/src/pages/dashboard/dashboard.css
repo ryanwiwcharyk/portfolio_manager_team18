@@ -73,8 +73,96 @@
   align-items: flex-start;
 }
 
+.dashboard-section-title-group h2 {
+  margin: 0;
+}
+
 .dashboard-section-subtext {
   font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-bottom: 0;
+  margin-left: 2px;
+}
+
+.portfolio-summary {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  justify-content: flex-end;
+}
+
+.portfolio-summary p {
+  margin: 0;
+}
+
+
+/* Pie Chart Styles */
+.pie-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  min-height: 250px;
+}
+
+.pie-chart {
+  max-width: 200px;
+  height: auto;
+}
+
+.pie-chart-legend {
+  margin-top: 20px;
+}
+
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 4px solid transparent;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.dashboard-section-title-group h2 {
+  margin: 0;
+}
+
+.dashboard-section-subtext {
+  font-size: 0.9rem;
+}
+
+.legend-value {
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.legend-percentage {
+  font-size: 0.8rem;
   color: #6b7280;
   margin-top: 2px;
   margin-bottom: 0;
@@ -200,6 +288,18 @@
 .dashboard-action-btn:hover {
   background-color: #0e5d79;
   box-shadow: 0 4px 12px rgba(23, 135, 172, 0.3);
+}
+
+.dashboard-action-btn-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  justify-content: flex-end;
+}
+
+.dashboard-actions-bottom {
+  display: inline-flex;
+  gap: 8px;
 }
 
 

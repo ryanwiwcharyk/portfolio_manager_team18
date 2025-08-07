@@ -7,6 +7,7 @@ SET SQL_SAFE_UPDATES = 0;
 DELETE FROM transactions;
 DELETE FROM stocks;
 DELETE FROM portfolios;
+DROP TABLE stock_data;
 
 -- RE-ENABLE SAFE UPDATES
 SET SQL_SAFE_UPDATES = 1;
@@ -75,3 +76,19 @@ INSERT INTO transactions (ticker_symbol, portfolioid, price, qty, is_sell, trans
 ('NVDA', 3, 520.00, 5, TRUE, '2024-03-18 15:30:00'),
 ('TSLA', 3, 230.00, 5, TRUE, '2024-03-21 09:20:00');
 
+INSERT INTO stock_data (ticker_symbol, price, change_percent) VALUES
+('IBM', 250.6700, -0.5199),
+('AAPL', 202.9200, -0.2115),
+('MSFT', 527.7500, -1.4730),
+('GOOGL', 194.6700, -0.1897),
+('NVDA', 178.2600, -0.9667),
+('TSLA', 308.7200, -0.1746),
+('META', 763.4600, -1.6629),
+('NFLX', 1147.8700, -1.9744),
+('AMD', 174.3100, -1.3972),
+('AMZN', 213.7500, 0.9922),
+('INTC', 20.1900, 3.5385),
+('JNJ', 172.4500, 0.2241),
+('PG', 160.3200, -0.3102),
+('KO', 59.8700, 0.1145),
+('WMT', 169.7500, -0.5903);

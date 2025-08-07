@@ -17,14 +17,14 @@ function Home() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const navigate = useNavigate();
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
-  
+
   React.useEffect(() => {
     const fetchPortfolios = async () => {
       try {
         const response = await getPortfolios();
         setPortfolios(response.data);
       } catch (error) {
-        notify('Failed to fetch portfolios: ' + error.message);
+        notify('Failed to fetch portfolios: ' + error.response.data.errorMessage);
       }
     };
     fetchPortfolios();
@@ -68,25 +68,37 @@ function Home() {
       await deletePortfolio(id);
       setPortfolios(prev => prev.filter(p => p.portfolioID !== id));
     } catch (error) {
-      notify('Failed to delete portfolio: ' + error.message);
+      notify('Failed to delete portfolio: ' + error.response.data.errorMessage);
     }
   };
 
   const onCreateSubmit = async (data) => {
-    const portfolioData = { ...data, cash: startingCash };
-    const response = await createPortfolio(portfolioData);
-    const newPortfolio = response.data;
-    setPortfolios(prev => [...prev, newPortfolio]);
-    setShowCreateModal(false);
+    try {
+      const portfolioData = { ...data, cash: startingCash };
+      const response = await createPortfolio(portfolioData);
+      const newPortfolio = response.data;
+      setPortfolios(prev => [...prev, newPortfolio]);
+    } catch (error) {
+      notify('Failed to create portfolio: ' + error.response.data.errorMessage);
+    }
+    finally {
+      setShowCreateModal(false);
+    }
   }
 
   const onEditSubmit = async (data) => {
-    const updatedPortfolio = { ...currentPortfolio, ...data };
-    const response = await updatePortfolio(updatedPortfolio.portfolioID, updatedPortfolio);
-    const updatedData = response.data;
-    setPortfolios(prev => prev.map(p => p.portfolioID === updatedData.portfolioID ? updatedData : p));
-    setCurrentPortfolio(null);
-    setShowEditModal(false);
+    try {
+      const updatedPortfolio = { ...currentPortfolio, ...data };
+      const response = await updatePortfolio(updatedPortfolio.portfolioID, updatedPortfolio);
+      const updatedData = response.data;
+      setPortfolios(prev => prev.map(p => p.portfolioID === updatedData.portfolioID ? updatedData : p));
+    } catch (error) {
+      notify('Failed to update portfolio: ' + error.response.data.errorMessage);
+    } finally {
+      setCurrentPortfolio(null);
+      setShowEditModal(false);
+
+    }
   }
 
   return (
@@ -94,7 +106,7 @@ function Home() {
       <h1>Hi, <span>We're Team 18,</span></h1>
       <h2 className="animated-heading">Welcome to our Portfolio Manager</h2>
       <p>Our portfolio manager web application designed to help users manage their stock investments efficiently. It allows users to create and organize multiple portfolios, track cash balances, and maintain detailed descriptions for each portfolio. With an intuitive interface and simple controls, users can easily add, edit, and delete portfolios and stocks, making it ideal for individual investors or students learning about portfolio management.
-      </p>    
+      </p>
       <div className="button-wrapper">
         <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Add Portfolio</button>
         <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Search Portfolio</button>
