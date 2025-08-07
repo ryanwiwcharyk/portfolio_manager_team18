@@ -51,6 +51,8 @@ function Dashboard() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
+  const [realizedP, setRealizedP] = useState();
+  const [unrealizedP, setUnrealizedP] = useState();
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
 
   useEffect(() => {
@@ -109,6 +111,14 @@ function Dashboard() {
     fetchTransactions();
   }, [id, activeTab]);
 
+  useEffect(() => {
+    const updatedUnrealized = calculateUnrealizedPnL(portfolioStocks);
+    const updatedRealized = calculateRealizedPnL(transactions);
+    setUnrealizedP(updatedUnrealized);
+    setRealizedP(updatedRealized);
+  }, [portfolioStocks, transactions]);
+
+
   const refreshStocks = async () => {
     try {
       const response = await getStocks(id);
@@ -139,25 +149,76 @@ function Dashboard() {
     }
   }
 
-  const onSellSubmit = async (data) => {
-    try {
-        const requestData = {
-        portfolioID: portfolio.portfolioID,
-        tickerSymbol: selectedStock.tickerSymbol,
-        qty: data.qty
-      };
-      
-      const response = await sellStock(requestData);      
-      portfolio.cash = portfolio.cash + response.data.updatedCash;
-      
-      const stocksResponse = await getStocks(portfolio.portfolioID);
-      setPortfolioStocks(stocksResponse.data || []);
-    } catch (error) {
-      notify('Failed to sell stock: ' + error.response.data.errorMessage);
-    } finally {
-      handleCloseSellModal();
+  const calculateUnrealizedPnL = (stocks) => {
+  if (!stocks || stocks.length === 0) return 0;
+
+  return stocks.reduce((sum, stock) => {
+    const marketValue = stock.currentPrice * stock.qty;
+    const costBasis = stock.avgPrice * stock.qty;
+    return sum + (marketValue - costBasis);
+  }, 0);
+};
+
+const calculateRealizedPnL = (transactions) => {
+  if (!transactions || transactions.length === 0) return 0;
+
+  let realizedPnL = 0;
+  const costBasis = {};
+
+  const sorted = [...transactions].sort((a, b) => new Date(a.transactionTime) - new Date(b.transactionTime));
+
+  for (const tx of sorted) {
+    const ticker = tx.tickerSymbol;
+    const qty = tx.qty;
+    const price = tx.price;
+
+    if (!costBasis[ticker]) {
+      costBasis[ticker] = { totalQty: 0, totalCost: 0 };
     }
-  };
+
+    if (!tx.sell) {
+      costBasis[ticker].totalQty += qty;
+      costBasis[ticker].totalCost += price * qty;
+    } else {
+      const { totalQty, totalCost } = costBasis[ticker];
+      if (totalQty === 0) continue;
+
+      const avgCost = totalCost / totalQty;
+      realizedPnL += (price - avgCost) * qty;
+
+      costBasis[ticker].totalQty -= qty;
+      costBasis[ticker].totalCost -= avgCost * qty;
+    }
+  }
+
+  return realizedPnL;
+};
+
+
+  const onSellSubmit = async (data) => {
+  try {
+    const requestData = {
+      portfolioID: portfolio.portfolioID,
+      tickerSymbol: selectedStock.tickerSymbol,
+      qty: data.qty
+    };
+
+    const response = await sellStock(requestData);
+    portfolio.cash = portfolio.cash + response.data.updatedCash;
+
+    const stocksResponse = await getStocks(portfolio.portfolioID);
+    setPortfolioStocks(stocksResponse.data || []);
+
+    const txResponse = await getTransactionsByPortfolioId(portfolio.portfolioID);
+    const sortedTxs = txResponse.data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
+    setTransactions(sortedTxs);
+  } catch (error) {
+    notify('Failed to sell stock: ' + error.response.data.errorMessage);
+  } finally {
+    handleCloseSellModal();
+  }
+};
+
 
   const onDepositSubmit = async (data) => {
     try {
@@ -454,53 +515,7 @@ function Dashboard() {
   return portfolio.cash + stockValue - 1000;
 };
 
-  const getUnrealizedPnL = () => {
-    if (!portfolioStocks || portfolioStocks.length === 0) return 0;
-
-    return portfolioStocks.reduce((sum, stock) => {
-      const marketValue = stock.currentPrice * stock.qty;
-      const costBasis = stock.avgPrice * stock.qty;
-      return sum + (marketValue - costBasis);
-    }, 0);
-  };
-
-  const getRealizedPnL = () => {
-  if (!transactions || transactions.length === 0) return 0;
-
-  let realizedPnL = 0;
-  const costBasis = {};
-
-  // Sort transactions oldest to newest
-  const sorted = [...transactions].sort((a, b) => new Date(a.transactionTime) - new Date(b.transactionTime));
-
-  for (const tx of sorted) {
-    const ticker = tx.tickerSymbol;
-    const qty = tx.qty;
-    const price = tx.price;
-
-    if (!costBasis[ticker]) {
-      costBasis[ticker] = { totalQty: 0, totalCost: 0 };
-    }
-
-    if (!tx.sell) {
-      costBasis[ticker].totalQty += qty;
-      costBasis[ticker].totalCost += price * qty;
-    } else {
-      const { totalQty, totalCost } = costBasis[ticker];
-
-      if (totalQty === 0) continue;
-
-      const avgCost = totalCost / totalQty;
-      const pnl = (price - avgCost) * qty;
-      realizedPnL += pnl;
-
-      costBasis[ticker].totalQty -= qty;
-      costBasis[ticker].totalCost -= avgCost * qty;
-    }
-  }
-
-  return realizedPnL;
-};
+  
 
 
 
@@ -517,11 +532,11 @@ function Dashboard() {
           <h2>
             Portfolio Value: {formatter.format(getTotalPortfolioValue())}
           </h2>
-          <h4 style={{ marginLeft: '1rem', color: getUnrealizedPnL() >= 0 ? 'limegreen' : 'tomato' }}>
-            Unrealized {getUnrealizedPnL() >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(getUnrealizedPnL()))}
-          </h4>
-          <h2 style={{ marginLeft: '1rem', color: getRealizedPnL() >= 0 ? 'limegreen' : 'tomato' }}>
-            Realized {getRealizedPnL() >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(getRealizedPnL()))}
+          <h2 style={{ color: unrealizedP >= 0 ? 'limegreen' : 'tomato' }}>
+            Unrealized {unrealizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(unrealizedP))}
+          </h2>
+          <h2 style={{ color: realizedP >= 0 ? 'limegreen' : 'tomato' }}>
+            Realized {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(realizedP))}
           </h2>
 
           
