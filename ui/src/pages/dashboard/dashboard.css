@@ -85,6 +85,19 @@
   margin-left: 2px;
 }
 
+.portfolio-summary {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  justify-content: flex-end;
+}
+
+.portfolio-summary p {
+  margin: 0;
+}
+
+
 /* Pie Chart Styles */
 .pie-chart-container {
   display: flex;
