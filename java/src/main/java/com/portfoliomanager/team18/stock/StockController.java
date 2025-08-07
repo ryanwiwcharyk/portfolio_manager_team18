@@ -19,20 +19,28 @@ public class StockController {
     private StockService stockService;
 
     @GetMapping("/{portfolioID}")
-    public List<Stock> getByPortfolioID(@PathVariable Integer portfolioID) {
-        return stockService.getStockByPortfolioId(portfolioID);
+    public ResponseEntity<List<Stock>> getByPortfolioID(@PathVariable Integer portfolioID) {
+        List<Stock> stockList = stockService.getStockByPortfolioId(portfolioID);
+        return ResponseEntity.ok(stockList);
     }
 
     @GetMapping("/{portfolioID}/{ticker}")
-    public Stock getById(@PathVariable Integer portfolioID, @PathVariable String ticker) {
-        return stockService.getStockByTickerAndPortfolioId(ticker, portfolioID);
+    public ResponseEntity<Stock> getById(@PathVariable Integer portfolioID, @PathVariable String ticker) {
+        Stock stock = stockService.getStockByTickerAndPortfolioId(ticker, portfolioID);
+        return ResponseEntity.ok(stock);
     }
 
+<<<<<<< HEAD
     @PostMapping("/purchase")
     public NewStockDTO create(@RequestBody NewStockRequest req)
+=======
+    @PostMapping
+    public ResponseEntity<NewStockDTO> create(@RequestBody NewStockRequest req)
+>>>>>>> hannah_branch
     {
         logger.info("Received request to purchase stock {}", req);
-        return stockService.saveNewStockRequest(req);
+        NewStockDTO newStockDTO = stockService.saveNewStockRequest(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newStockDTO);
     }
 
     @PostMapping("/sell")
@@ -48,13 +56,22 @@ public class StockController {
     }
 
     @PutMapping("/{portfolioID}/{ticker}")
-    public Stock update(@PathVariable Integer portfolioID, @PathVariable String ticker, @RequestBody UpdateStockRequest req) {
-        return stockService.updateStockRequest(ticker, portfolioID, req);
+    public ResponseEntity<Stock> update(@PathVariable Integer portfolioID, @PathVariable String ticker, @RequestBody UpdateStockRequest req) {
+        Stock stock = stockService.updateStockRequest(ticker, portfolioID, req);
+        return ResponseEntity.ok(stock);
     }
 
+<<<<<<< HEAD
 //    @DeleteMapping
 //    public void delete(@RequestBody SellStockRequest req) {
 //        logger.info("Received request to sell {} shares of {}", req.getNumberOfShares(), req.getTickerSymbol());
 //        stockService.deleteStockById(ticker, portfolioID);
 //    }
+=======
+    @DeleteMapping("/{portfolioID}/{ticker}")
+    public ResponseEntity<Void> delete(@PathVariable Integer portfolioID, @PathVariable String ticker) {
+        stockService.deleteStockById(ticker, portfolioID);
+        return ResponseEntity.noContent().build();
+    }
+>>>>>>> hannah_branch
 }
