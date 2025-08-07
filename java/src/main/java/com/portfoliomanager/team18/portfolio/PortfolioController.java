@@ -38,6 +38,11 @@ public class PortfolioController {
         return ResponseEntity.ok(portfolio);
     }
 
+    @PutMapping("/{id}/updateCash")
+    public Portfolio updatePortfolio(@PathVariable Integer id, @RequestBody Double cash) {
+        return portfolioService.updateCash(id, cash);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);

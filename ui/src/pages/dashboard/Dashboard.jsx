@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { set, useForm } from 'react-hook-form';
 import { getStocks, purchaseStock, sellStock } from '../../services/stockService';
 import { getTransactionsByPortfolioId } from '../../services/transactionService';
-import { getPortfolioById } from '../../services/portfolioService';
+import { getPortfolioById, depositCash, withdrawCash } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -48,6 +48,8 @@ function Dashboard() {
   const [portfolioStocks, setPortfolioStocks] = useState([]);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
   const notify = (message) => toast.error(message, { position: "top-right", autoClose: 5000 });
 
@@ -154,6 +156,28 @@ function Dashboard() {
       notify('Failed to sell stock: ' + error.response.data.errorMessage);
     } finally {
       handleCloseSellModal();
+    }
+  };
+
+  const onDepositSubmit = async (data) => {
+    try {
+      const response = await depositCash(id, data.amount);
+      setPortfolio(response.data);
+    } catch (error) {
+      notify('Failed to deposit: ' + error.message);
+    } finally {
+      handleCloseDepositModal();
+    }
+  };
+
+  const onWithdrawSubmit = async (data) => {
+    try {
+      const response = await withdrawCash(id, data.amount);
+      setPortfolio(response.data);
+    } catch (error) {
+      notify('Failed to withdraw: ' + error.message);
+    } finally {
+      handleCloseWithdrawModal();
     }
   };
 
@@ -265,6 +289,142 @@ function Dashboard() {
       </div>
     );
   }
+  const handleOpenDepositModal = () => {
+    setShowDepositModal(true);
+  };
+
+  const handleCloseDepositModal = () => {
+    setShowDepositModal(false);
+  };
+
+  const handleOpenWithdrawModal = () => {
+    setShowWithdrawModal(true);
+  };
+
+  const handleCloseWithdrawModal = () => {
+    setShowWithdrawModal(false);
+  };
+
+  // Calculate portfolio allocation data for pie chart
+  const getPortfolioAllocation = () => {
+    if (!portfolio || !portfolioStocks) return [];
+    
+    const allocation = [];
+    
+    // Add cash
+    if (portfolio.cash > 0) {
+      allocation.push({
+        name: 'Cash',
+        value: portfolio.cash,
+        color: '#10B981', // Green for cash
+        percentage: 0
+      });
+    }
+    
+    // Add stocks
+    portfolioStocks.forEach(stock => {
+      const stockValue = stock.qty * stock.currentPrice;
+      if (stockValue > 0) {
+        allocation.push({
+          name: stock.tickerSymbol,
+          value: stockValue,
+          color: getStockColor(stock.tickerSymbol),
+          percentage: 0
+        });
+      }
+    });
+    
+    // Calculate percentages
+    const totalValue = allocation.reduce((sum, item) => sum + item.value, 0);
+    allocation.forEach(item => {
+      item.percentage = totalValue > 0 ? (item.value / totalValue) * 100 : 0;
+    });
+    
+    return allocation.sort((a, b) => b.value - a.value); // Sort by value descending
+  };
+
+  // Generate colors for stocks
+  const getStockColor = (ticker) => {
+    const colors = [
+      '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899',
+      '#06B6D4', '#84CC16', '#F97316', '#6366F1', '#14B8A6'
+    ];
+    const index = ticker.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
+  // Render pie chart
+  const renderPieChart = () => {
+    const allocation = getPortfolioAllocation();
+    if (allocation.length === 0) {
+      return <div className="no-data-message">No portfolio data available</div>;
+    }
+
+    const size = 200;
+    const radius = size / 2;
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    let currentAngle = 0;
+    const paths = [];
+
+    allocation.forEach((item, index) => {
+      const angle = (item.percentage / 100) * 2 * Math.PI;
+      const endAngle = currentAngle + angle;
+      
+      const x1 = centerX + radius * Math.cos(currentAngle);
+      const y1 = centerY + radius * Math.sin(currentAngle);
+      const x2 = centerX + radius * Math.cos(endAngle);
+      const y2 = centerY + radius * Math.sin(endAngle);
+      
+      const largeArcFlag = angle > Math.PI ? 1 : 0;
+      
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      
+      paths.push(
+        <path
+          key={index}
+          d={pathData}
+          fill={item.color}
+          stroke="#fff"
+          strokeWidth="2"
+        />
+      );
+      
+      currentAngle = endAngle;
+    });
+
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="pie-chart">
+        {paths}
+      </svg>
+    );
+  };
+
+  // Render pie chart legend
+  const renderPieChartLegend = () => {
+    const allocation = getPortfolioAllocation();
+    
+    return (
+      <div className="legend-items">
+        {allocation.map((item, index) => (
+          <div key={index} className="legend-item">
+            <div className="legend-color" style={{ backgroundColor: item.color }}></div>
+            <div className="legend-text">
+              <span className="legend-name">{item.name}</span>
+              <span className="legend-value">{formatter.format(item.value)}</span>
+              <span className="legend-percentage">({item.percentage.toFixed(1)}%)</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   if (!portfolio) {
     return (
@@ -283,47 +443,18 @@ function Dashboard() {
 
   const renderDashboardTab = () => (
     <>
-      <div className="dashboard-actions-top">
-        <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
-        <button className="dashboard-action-btn">Sell</button>
+        <div className="dashboard-actions-top">
+          <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
+          <button onClick={handleOpenDepositModal} className="dashboard-action-btn">Deposit</button>
+          <button onClick={handleOpenWithdrawModal} className="dashboard-action-btn">Withdraw</button>
       </div>
       <div className="dashboard-section">
-        <h2>Portfolio Value Over Time</h2>
-        {/* SVG Line Graph */}
-        <div className="graph-container">
-          <svg width="600" height="110" className="dashboard-graph">
-            {/* Line */}
-            <polyline
-              fill="none"
-              stroke="#e3e7edff"
-              strokeWidth="3"
-              points={portfolioHistory.map((h, i) => {
-                const padding = 10;
-                const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
-                const y = 120 - (h.value / maxHistoryValue) * 100;
-                return `${x},${y}`;
-              }).join(' ')}
-            />
-            {/* Dots */}
-            {portfolioHistory.map((h, i) => {
-              const padding = 10;
-              const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
-              const y = 120 - (h.value / maxHistoryValue) * 100;
-              return <circle key={h.date} cx={x} cy={y} r="4" fill="#e3e7edff" />;
-            })}
-          </svg>
-          {/* Labels */}
-          <div className="dashboard-graph-labels">
-            {portfolioHistory.map((h, i) => {
-              const padding = 10;
-              const x = padding + (i / (portfolioHistory.length - 1)) * (600 - 2 * padding);
-              return (
-                <span key={h.date} style={{ left: `${x}px` }}>
-                  {h.date.slice(5)}
-                </span>
-              );
-            })}
-          </div>
+        <h2>Portfolio Allocation</h2>
+        <div className="pie-chart-container">
+          {renderPieChart()}
+        </div>
+        <div className="pie-chart-legend">
+          {renderPieChartLegend()}
         </div>
       </div>
       <div className="dashboard-section">
@@ -453,10 +584,74 @@ function Dashboard() {
             </form>
           </div>
         </div>
-      )}
-      <ToastContainer />
-    </>
-  );
+             )}
+       {showDepositModal && (
+         <div className="modal-backdrop">
+           <div className="modal">
+             <h2>Deposit Cash</h2>
+             <form className="form-control" onSubmit={handleSubmit(onDepositSubmit)}>
+               <label htmlFor="deposit-amount">Amount ($):</label>
+               <input
+                 {...register("amount", {
+                   required: true,
+                   min: 0.01,
+                   valueAsNumber: true,
+                 })}
+                 id="deposit-amount"
+                 type="number"
+                 step="0.01"
+                 min="0.01"
+                 placeholder="Enter amount to deposit"
+               />
+               {errors.amount && (
+                 <span className="error-message">
+                   {errors.amount.message || "Please enter a valid amount"}
+                 </span>
+               )}
+               <div className="button-row">
+                 <button type="submit">Deposit</button>
+                 <button type="button" onClick={handleCloseDepositModal}>Cancel</button>
+               </div>
+             </form>
+           </div>
+         </div>
+       )}
+       {showWithdrawModal && (
+         <div className="modal-backdrop">
+           <div className="modal">
+             <h2>Withdraw Cash</h2>
+             <form className="form-control" onSubmit={handleSubmit(onWithdrawSubmit)}>
+               <label htmlFor="withdraw-amount">Amount ($):</label>
+               <input
+                 {...register("amount", {
+                   required: true,
+                   min: 0.01,
+                   max: portfolio.cash,
+                   valueAsNumber: true,
+                 })}
+                 id="withdraw-amount"
+                 type="number"
+                 step="0.01"
+                 min="0.01"
+                 max={portfolio.cash}
+                 placeholder={`Max: ${formatter.format(portfolio.cash)}`}
+               />
+               {errors.amount && (
+                 <span className="error-message">
+                   {errors.amount.message || `Enter a value between 0.01 and ${formatter.format(portfolio.cash)}`}
+                 </span>
+               )}
+               <div className="button-row">
+                 <button type="submit">Withdraw</button>
+                 <button type="button" onClick={handleCloseWithdrawModal}>Cancel</button>
+               </div>
+             </form>
+           </div>
+         </div>
+       )}
+       <ToastContainer />
+     </>
+   );
 
   const renderTransactionsTab = () => (
     <div className="dashboard-section">
