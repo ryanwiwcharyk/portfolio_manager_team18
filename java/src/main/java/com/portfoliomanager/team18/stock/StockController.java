@@ -30,13 +30,8 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
-<<<<<<< HEAD
     @PostMapping("/purchase")
-    public NewStockDTO create(@RequestBody NewStockRequest req)
-=======
-    @PostMapping
     public ResponseEntity<NewStockDTO> create(@RequestBody NewStockRequest req)
->>>>>>> hannah_branch
     {
         logger.info("Received request to purchase stock {}", req);
         NewStockDTO newStockDTO = stockService.saveNewStockRequest(req);
@@ -61,17 +56,14 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
-<<<<<<< HEAD
 //    @DeleteMapping
 //    public void delete(@RequestBody SellStockRequest req) {
 //        logger.info("Received request to sell {} shares of {}", req.getNumberOfShares(), req.getTickerSymbol());
 //        stockService.deleteStockById(ticker, portfolioID);
 //    }
-=======
     @DeleteMapping("/{portfolioID}/{ticker}")
     public ResponseEntity<Void> delete(@PathVariable Integer portfolioID, @PathVariable String ticker) {
         stockService.deleteStockById(ticker, portfolioID);
         return ResponseEntity.noContent().build();
     }
->>>>>>> hannah_branch
 }

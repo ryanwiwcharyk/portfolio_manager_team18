@@ -1,11 +1,8 @@
 package com.portfoliomanager.team18.exception.handler;
 
 import com.portfoliomanager.team18.exception.InsufficientCashException;
-<<<<<<< HEAD
-=======
 import com.portfoliomanager.team18.exception.PortfolioIllegalArgumentException;
 import com.portfoliomanager.team18.exception.StockIllegalArgumentException;
->>>>>>> hannah_branch
 import jdk.jfr.Experimental;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,9 +24,6 @@ public class PortfolioExceptionHandler extends ResponseEntityExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(response);
     }
-<<<<<<< HEAD
-}
-=======
 
     @ExceptionHandler({PortfolioIllegalArgumentException.class})
     protected ResponseEntity<Map<String, Object>> handlePortfolioIllegalArgumentException(IllegalArgumentException ex) {
@@ -47,4 +41,4 @@ public class PortfolioExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(response);
     }
 }
->>>>>>> hannah_branch
+
