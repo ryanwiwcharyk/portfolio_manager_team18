@@ -94,17 +94,19 @@ public class StockService {
         Stock stock;
         if (existingStock.isPresent()) {
             stock = existingStock.get();
-            stock.setQty(stock.getQty() + req.getQty());
+            Double newAvgPrice = calculateAveragePrice(
+                    stock.getAvgPrice(), stock.getQty(),
+                    stockData.getPrice(), req.getQty()
+            );
+                    stock.setQty(stock.getQty() + req.getQty());
             logger.debug("Buying more stock: {}", stock);
-            //            throw new IllegalArgumentException("Stock " + req.getTickerSymbol() + " already exists in portfolio " +
-//                    req.getPortfolioID() + ". Please use the update method.");
         } else {
             stock = new Stock();
             stock.setTickerSymbol(req.getTickerSymbol());
             stock.setPortfolioID(req.getPortfolioID());
             stock.setQty(req.getQty());
             stock.setCurrentPrice(stockData.getPrice());
-            stock.setAvgPrice(0);
+            stock.setAvgPrice(stockData.getPrice()); // Initial purchase sets avg price to current price
             stock.setChangePercent(stockData.getChangePercent());
             logger.debug("Saving stock: {}", stock);
         }
@@ -201,16 +203,18 @@ public class StockService {
         stockRepo.deleteById(new StockId(ticker, portfolioID));
     }
 
-    private BigDecimal calculateAveragePrice(BigDecimal currentAvgPrice, int currentQty, BigDecimal newPrice, int newQty) {
-        BigDecimal totalCost = currentAvgPrice.multiply(BigDecimal.valueOf(currentQty))
-                .add(newPrice.multiply(BigDecimal.valueOf(newQty)));
-
-        int totalQty = currentQty + newQty;
-
-        if (totalQty == 0) {
-            return BigDecimal.ZERO;
+    private Double calculateAveragePrice(Double currentAvgPrice, Integer currentQty, Double newPrice, Integer newQty) {
+        if (currentQty == 0) {
+            // Initial purchase - average price is the purchase price
+            return newPrice;
         }
 
-        return totalCost.divide(BigDecimal.valueOf(totalQty));
+        // Calculate weighted average price
+        Double currentValue = currentAvgPrice * currentQty;
+        Double newValue = newPrice * newQty;
+        Double totalValue = currentValue + newValue;
+        Integer totalQty = currentQty + newQty;
+
+        return totalValue / totalQty;
     }
 }
