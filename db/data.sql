@@ -18,25 +18,25 @@ INSERT INTO portfolios(portfolioID, cash, portfolio_name, description) VALUES
 (2, 3000.00, "Hannah's Portfolio", "FHSA"),
 (3, 1000.00, "Derin's Portfolio", "RRSP");
 
-INSERT INTO stocks (ticker_symbol, portfolioid, qty, avg_price) VALUES
+INSERT INTO stocks (ticker_symbol, portfolioid, qty, current_price, avg_price, change_percent) VALUES
 -- Ryan Portfolio
-('AAPL', 1, 50, 150.25),
-('MSFT', 1, 30, 280.50),
-('GOOGL', 1, 25, 120.75),
-('AMZN', 1, 40, 85.30),
+('AAPL', 1, 50, 202.92, 150.25, -0.2115),
+('MSFT', 1, 30, 527.75, 280.50, -1.4730),
+('GOOGL', 1, 25, 194.67, 120.75, -0.1897),
+('AMZN', 1, 40, 213.75, 85.30, 0.9922),
 
 -- Hannah Portfolio
-('JNJ', 2, 100, 165.80),
-('PG', 2, 75, 145.20),
-('KO', 2, 200, 55.40),
-('WMT', 2, 60, 160.90),
+('JNJ', 2, 100, 172.45, 165.80, 0.2241),
+('PG', 2, 75, 160.32, 145.20, -0.3102),
+('KO', 2, 200, 59.87, 55.40, 0.1145),
+('WMT', 2, 60, 169.75, 160.90, -0.5903),
 
 -- Derin Portfolio
-('NVDA', 3, 20, 450.75),
-('TSLA', 3, 15, 220.30),
-('META', 3, 35, 180.60),
-('NFLX', 3, 45, 95.20),
-('AMD', 3, 80, 110.45);
+('NVDA', 3, 20, 178.26, 450.75, -0.9667),
+('TSLA', 3, 15, 308.72, 220.30, -0.1746),
+('META', 3, 35, 763.46, 180.60, -1.6629),
+('NFLX', 3, 45, 1147.87, 95.20, -1.9744),
+('AMD', 3, 80, 174.31, 110.45, -1.3972);
 
 -- TRANSACTIONS
 INSERT INTO transactions (ticker_symbol, portfolioid, price, qty, is_sell, transaction_time) VALUES
