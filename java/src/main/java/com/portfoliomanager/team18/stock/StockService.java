@@ -53,38 +53,39 @@ public class StockService {
         }
         Portfolio portfolio = existingPortfolio.get();
         StockId stockId = new StockId(req.getTickerSymbol(), req.getPortfolioID());
-
-        // Check if stock already exists
-        Optional<Stock> existingStock = stockRepo.findById(stockId);
-        if (existingStock.isPresent()) {
-            throw new IllegalArgumentException("Stock " + req.getTickerSymbol() + " already exists in portfolio " +
-                    req.getPortfolioID() + ". Please use the update method.");
-        }
         StockData stockData = stockDataRepository.findByTickerSymbol(req.getTickerSymbol());
-
-        logger.info("Received stock quote from DB:" +
-                "Symbol: {}" +
-                "Price: {}," +
-                "Change %: {}", stockData.getTickerSymbol(), stockData.getPrice(), stockData.getChangePercent());
-        //check if portfolio has enough cash to purchase
-        logger.debug("User wants {} x{}", req.getTickerSymbol(), req.getQty());
-        logger.debug("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()));
+        logger.info("Received stock quote from DB:\nSymbol: {}\nPrice: {}\nChange %: {}", stockData.getTickerSymbol(), stockData.getPrice(), stockData.getChangePercent());
+        logger.info("User wants {} x{}", req.getTickerSymbol(), req.getQty());
+        logger.info("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()));
+        //check if user can afford stock purchase
         if (existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()) < 0)
             throw new InsufficientCashException("Your portfolio does not have enough cash to purchase x" + req.getQty()
                     + " of " + req.getTickerSymbol());
 
+        // Check if stock already exists
+        Optional<Stock> existingStock = stockRepo.findById(stockId);
+        Stock stock;
+        if (existingStock.isPresent()) {
+            stock = existingStock.get();
+            stock.setQty(stock.getQty() + req.getQty());
+            logger.debug("Buying more stock: {}", stock);
+            //            throw new IllegalArgumentException("Stock " + req.getTickerSymbol() + " already exists in portfolio " +
+//                    req.getPortfolioID() + ". Please use the update method.");
+        } else {
+            stock = new Stock();
+            stock.setTickerSymbol(req.getTickerSymbol());
+            stock.setPortfolioID(req.getPortfolioID());
+            stock.setQty(req.getQty());
+            stock.setCurrentPrice(stockData.getPrice());
+            stock.setAvgPrice(0);
+            stock.setChangePercent(stockData.getChangePercent());
+            logger.debug("Saving stock: {}", stock);
+        }
+        stockRepo.save(stock);
+        //update portfolio cash
         existingPortfolio.get().setCash(existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()));
         portfolioRepo.save(existingPortfolio.get());
-        Stock stock = new Stock();
-        stock.setTickerSymbol(req.getTickerSymbol());
-        stock.setPortfolioID(req.getPortfolioID());
-        stock.setQty(req.getQty());
-        stock.setCurrentPrice(stockData.getPrice());
-        stock.setAvgPrice(0);
-        stock.setChangePercent(stockData.getChangePercent());
-        logger.debug("Saving stock: {}", stock);
-        stockRepo.save(stock);
-
+        //record new transaction
         Transaction transaction = new Transaction();
         transaction.setPortfolioID(portfolio.getPortfolioID());
         transaction.setTickerSymbol(stockData.getTickerSymbol());
@@ -93,7 +94,7 @@ public class StockService {
         transaction.setSell(false);
         transaction.setTransactionTime(ZonedDateTime.now(ZoneId.systemDefault()));
         transactionRepository.save(transaction);
-
+        //return new/updated stock data
         NewStockDTO stockDTO = new NewStockDTO(
                 stock.getTickerSymbol(),
                 stock.getPortfolioID(),
