@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,10 +80,10 @@ public class PortfolioService {
         Transaction cashTransaction = new Transaction();
         cashTransaction.setTickerSymbol(cash < 0 ? "WITHDRAW" : "DEPOSIT");
         cashTransaction.setPortfolioID(id);
-        cashTransaction.setPrice(BigDecimal.valueOf(Math.abs(cash)));
+        cashTransaction.setPrice((Math.abs(cash)));
         cashTransaction.setQty(1);
         cashTransaction.setSell(cash < 0); // true if withdraw, false if deposit
-        cashTransaction.setTransactionTime(new Timestamp(System.currentTimeMillis()));
+        cashTransaction.setTransactionTime(ZonedDateTime.now(ZoneId.systemDefault()));
         transactionRepo.save(cashTransaction);
 
         return updated;

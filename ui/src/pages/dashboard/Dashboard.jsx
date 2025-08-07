@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { set, useForm } from 'react-hook-form';
 import { getStocks, purchaseStock, sellStock } from '../../services/stockService';
 import { getTransactionsByPortfolioId } from '../../services/transactionService';
-import { getPortfolioById, getTransactionsByPortfolioId, depositCash, withdrawCash } from '../../services/portfolioService';
+import { getPortfolioById, depositCash, withdrawCash } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
