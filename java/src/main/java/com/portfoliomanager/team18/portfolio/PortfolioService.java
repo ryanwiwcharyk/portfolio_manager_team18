@@ -58,6 +58,10 @@ public class PortfolioService {
             throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
         }
 
+        if (portfolioRepo.findByPortfolioName(req.getPortfolioName()).isPresent()) {
+            throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
+        }
+
         Portfolio p = existingPortfolio.get();
         p.setPortfolioName(req.getPortfolioName());
         p.setDescription(req.getDescription());
@@ -74,7 +78,7 @@ public class PortfolioService {
 
         Portfolio p = existingPortfolio.get();
         if (p.getCash() < Math.abs(cash) && cash < 0){
-            throw new IllegalArgumentException("Cannot withdraw more than cash value");
+            throw new IllegalArgumentException("Cannot withdraw more than current portfolio cash value of");
         }
         p.setCash(p.getCash() + cash);
         Portfolio updated = portfolioRepo.save(p);
