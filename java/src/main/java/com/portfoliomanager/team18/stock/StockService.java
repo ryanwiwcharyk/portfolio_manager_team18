@@ -72,7 +72,10 @@ public class StockService {
                     stock.getAvgPrice(), stock.getQty(),
                     stockData.getPrice(), req.getQty()
             );
+            logger.info("New average price: {}", newAvgPrice);
             stock.setQty(stock.getQty() + req.getQty());
+            stock.setAvgPrice(newAvgPrice);
+            logger.info("Stock already exists, updating quantity ({}) and average price ({}).", stock.getQty(), stock.getAvgPrice());
             logger.debug("Buying more stock: {}", stock);
         } else {
             stock = new Stock();
