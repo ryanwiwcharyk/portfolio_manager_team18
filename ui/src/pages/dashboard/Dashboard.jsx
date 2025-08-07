@@ -1,13 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { getStocks, purchaseStock } from '../../services/stockService';
+import { set, useForm } from 'react-hook-form';
+import { getStocks, purchaseStock, sellStock } from '../../services/stockService';
+import { getTransactionsByPortfolioId } from '../../services/transactionService';
 import { getPortfolioById, getTransactionsByPortfolioId, depositCash, withdrawCash } from '../../services/portfolioService';
 import { formatter } from '../../constants/constants';
 import { ToastContainer, toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { formatISOToDateTime } from '../../formatters/dateFormmater';
 import './dashboard.css';
+
+// Add spinner animation styles
+const spinnerStyle = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Inject styles into head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = spinnerStyle;
+  document.head.appendChild(styleElement);
+}
 
 const portfolioHistory = [
   { date: '2024-06-01', value: 25000 },
@@ -22,9 +39,10 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+  const [portfolioError, setPortfolioError] = useState(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
   const maxHistoryValue = Math.max(...portfolioHistory.map(h => h.value));
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm();
   const { id } = useParams();
   const [portfolio, setPortfolio] = useState(null);
   const [portfolioStocks, setPortfolioStocks] = useState([]);
@@ -37,11 +55,21 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchPortfolio = async () => {
+      setPortfolioLoading(true);
+      setPortfolioError(null);
       try {
         const response = await getPortfolioById(id);
         setPortfolio(response.data);
       } catch (error) {
-        notify('Failed to fetch portfolio data: ' + error.message);
+        if (error.response?.status === 404) {
+          setPortfolioError('Portfolio not found. The portfolio you\'re looking for doesn\'t exist or may have been deleted.');
+        } else if (error.response?.status === 403) {
+          setPortfolioError('Access denied. You don\'t have permission to view this portfolio.');
+        } else {
+          setPortfolioError('Failed to load portfolio. Please check your connection and try again.');
+        }
+      } finally {
+        setPortfolioLoading(false);
       }
     };
     fetchPortfolio();
@@ -51,10 +79,10 @@ function Dashboard() {
     const fetchStocks = async () => {
       try {
         const response = await getStocks(id);
-        setPortfolioStocks(response.data);
+        setPortfolioStocks(response.data || []);
       }
       catch (error) {
-        notify('Failed to fetch portfolio stocks: ' + error.message);
+        notify('Failed to fetch portfolio stocks: ' + error.response.data.errorMessage);
       }
     };
     fetchStocks();
@@ -72,15 +100,23 @@ function Dashboard() {
         const sortedData = data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
         setTransactions(sortedData);
       } catch (err) {
-        console.error('Error fetching transactions:', err);
-        setError('Failed to load transactions. Please check if the backend is running.');
+        notify('Failed to fetch portfolio transactions: ' + err.response.data.errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, []);
+  }, [id, activeTab]);
+
+  const refreshStocks = async () => {
+    try {
+      const response = await getStocks(id);
+      setPortfolioStocks(response.data || []);
+    } catch (error) {
+      console.error('Failed to refresh stocks:', error);
+    }
+  };
 
   const onPurchaseSubmit = async (data) => {
     try {
@@ -90,27 +126,34 @@ function Dashboard() {
         qty: data.qty
       }
       const response = await purchaseStock(purchaseData);
-      const newStock = response.data;
-      portfolio.cash = response.data.cash;
+      portfolio.cash = response.data.updatedCash;
 
-      setPortfolioStocks(prevStocks => [...prevStocks, newStock]);
+      // Refresh stocks from server to ensure we have the latest data
+      await refreshStocks();
     }
     catch (error) {
-      notify('Failed to purchase stock: ' + error.message);
+      notify('Failed to purchase stock: ' + error.response.data.errorMessage);
     }
     finally {
-      setShowBuyModal(false);
+      handleCloseBuyModal();
     }
   }
 
   const onSellSubmit = async (data) => {
     try {
-      // Replace with your sellStock service call
-      // Example: await sellStock({ portfolioID: portfolio.portfolioID, tickerSymbol: selectedStock.tickerSymbol, qty: data.qty });
-      notify(`Sold ${data.qty} shares of ${selectedStock.tickerSymbol}`);
-      // Optionally update portfolioStocks here
+        const requestData = {
+        portfolioID: portfolio.portfolioID,
+        tickerSymbol: selectedStock.tickerSymbol,
+        qty: data.qty
+      };
+      
+      const response = await sellStock(requestData);      
+      portfolio.cash = portfolio.cash + response.data.updatedCash;
+      
+      const stocksResponse = await getStocks(portfolio.portfolioID);
+      setPortfolioStocks(stocksResponse.data || []);
     } catch (error) {
-      notify('Failed to sell stock: ' + error.message);
+      notify('Failed to sell stock: ' + error.response.data.errorMessage);
     } finally {
       handleCloseSellModal();
     }
@@ -139,7 +182,7 @@ function Dashboard() {
   };
 
   const formatTransaction = (transaction) => {
-    const date = new Date(transaction.transactionTime).toLocaleDateString();
+    const date = formatISOToDateTime(transaction.transactionTime);
     const type = transaction.sell === true ? 'SELL' : 'BUY';
     const total = (transaction.price * transaction.qty).toFixed(2);
     
@@ -160,18 +203,92 @@ function Dashboard() {
 
   const handleCloseBuyModal = () => {
     setShowBuyModal(false);
+    reset(); // Reset form when closing
   }
 
   const handleOpenSellModal = (stock) => {
     setSelectedStock(stock);
+    reset(); // Reset form when opening
     setShowSellModal(true);
   };
 
   const handleCloseSellModal = () => {
     setShowSellModal(false);
     setSelectedStock(null);
+    reset(); // Reset form when closing
   };
 
+
+  // Handle portfolio loading and error states
+  if (portfolioLoading) {
+    return (
+      <div className="dashboard-root">
+        <div className="loading-container" style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          flexDirection: 'column'
+        }}>
+          <div className="loading-spinner" style={{ 
+            border: '4px solid #f3f4f6',
+            borderTop: '4px solid #002B51',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '20px'
+          }}></div>
+          <p>Loading portfolio...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError) {
+    return (
+      <div className="dashboard-root">
+        <div className="error-container" style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh',
+          flexDirection: 'column',
+          textAlign: 'center',
+          padding: '20px'
+        }}>
+          <div style={{ 
+            fontSize: '64px', 
+            marginBottom: '20px',
+            color: '#e53e3e'
+          }}>⚠️</div>
+          <h2 style={{ color: '#e53e3e', marginBottom: '10px' }}>Portfolio Not Found</h2>
+          <p style={{ 
+            color: '#666', 
+            marginBottom: '20px',
+            maxWidth: '400px',
+            lineHeight: '1.5'
+          }}>
+            {portfolioError}
+          </p>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className="dashboard-action-btn"
+              onClick={() => window.history.back()}
+            >
+              Go Back
+            </button>
+            <button 
+              className="dashboard-action-btn"
+              onClick={() => window.location.href = '/'}
+            >
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const handleOpenDepositModal = () => {
     setShowDepositModal(true);
   };
@@ -310,7 +427,18 @@ function Dashboard() {
   };
 
   if (!portfolio) {
-    return <div>Loading...</div>;
+    return (
+      <div className="dashboard-root">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '50vh'
+        }}>
+          <p>No portfolio data available.</p>
+        </div>
+      </div>
+    );
   }
 
   const renderDashboardTab = () => (
@@ -343,36 +471,41 @@ function Dashboard() {
               <th>Stock</th>
               <th>Shares</th>
               <th>Avg Price ($)</th>
-              <th>Value ($)</th>
+              <th>Price Per Share ($)</th>
               <th>Change (%)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {portfolioStocks.map(stock => (
-              <tr key={stock.tickerSymbol}>
-                <td>{stock.tickerSymbol}</td>
-                <td>{stock.qty}</td>
-                <td>{stock.avgPrice}</td>
-                <td>{stock.currentPrice}</td>
-                <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
-                 <td>
-                  <button
-                    onClick={() => handleOpenSellModal(stock)}
-                    className="dashboard-action-btn"
-                    title="Sell"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                  <button
-                    className="dashboard-action-btn"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faPenToSquare} />
-                  </button>
+            {portfolioStocks && portfolioStocks.length > 0 ? (
+              portfolioStocks.map((stock, index) => (
+                <tr key={`${stock.tickerSymbol}-${stock.qty}-${stock.avgPrice}-${index}`}>
+                  <td>{stock.tickerSymbol.toUpperCase()}</td>
+                  <td>{stock.qty}</td>
+                  <td>{stock.avgPrice}</td>
+                  <td>{stock.currentPrice}</td>
+                  <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
+                   <td>
+                    <div className="dashboard-action-btn-group">
+                    <button
+                      onClick={() => handleOpenSellModal(stock)}
+                      className="dashboard-action-btn"
+                      title="Sell"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                    </div>
+                  </td>
+
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No stocks in your portfolio. Click the "Buy" button to add some stocks!
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -390,10 +523,17 @@ function Dashboard() {
                     value: /^[A-Za-z]{1,4}$/,
                     message: "Ticker must be 1-4 letters"
                   }
-                })} id="ticker-symbol" type="text" placeholder="ex: AAPL, MSFT..." maxLength={4} />
+                })} 
+                id="ticker-symbol" 
+                type="text" 
+                placeholder="ex: AAPL, MSFT..." 
+                maxLength={4}
+                style={{ textTransform: 'uppercase' }}
+                onInput={(e) => e.target.value = e.target.value.toUpperCase()}
+              />
               {errors.tickerSymbol && <span className='error-message'>{errors.tickerSymbol.message || "A ticker symbol is required"}</span>}
               <label htmlFor="quantity">Quantity:</label>
-              <input {...register("qty", { required: true })} id="quantity" type="number"></input>
+              <input {...register("qty", { required: true, valueAsNumber: true })} id="quantity" type="number"></input>
               {errors.qty && <span className='error-message'>{errors.qty.message || "A quantity is required"}</span>}
               <div className="button-row">
                 <button type="submit">Purchase</button>
@@ -579,8 +719,29 @@ function Dashboard() {
 
   return (
     <div className="dashboard-root">
-      <h1>{portfolio.portfolioName}</h1>
-      <h3>{portfolio.description}</h3>
+      <div className="dashboard-header">
+        <button 
+          className="dashboard-back-btn"
+          onClick={() => window.location.href = '/'}
+          style={{
+            background: 'none',
+            border: '1px solid #ccc',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#666',
+            fontSize: '14px'
+          }}
+        >
+          ← Go Back
+        </button>
+        <h1>{portfolio.portfolioName}</h1>
+        <h3>{portfolio.description}</h3>
+      </div>
       
       {/* Tab Navigation */}
       <div className="dashboard-tabs">
