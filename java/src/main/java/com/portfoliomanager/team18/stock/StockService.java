@@ -3,6 +3,7 @@ package com.portfoliomanager.team18.stock;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.timeseries.response.QuoteResponse;
 import com.portfoliomanager.team18.exception.InsufficientCashException;
+import com.portfoliomanager.team18.exception.StockIllegalArgumentException;
 import com.portfoliomanager.team18.portfolio.Portfolio;
 import com.portfoliomanager.team18.portfolio.PortfolioRepository;
 import com.portfoliomanager.team18.transaction.Transaction;
@@ -39,7 +40,7 @@ public class StockService {
     public Stock getStockByTickerAndPortfolioId(String ticker, Integer portfolioID) {
         Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
         if (existingStock.isEmpty()) {
-            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
+            throw new StockIllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
         }
 
         return existingStock.get();
@@ -49,16 +50,42 @@ public class StockService {
         // Check if portfolio exists
         Optional<Portfolio> existingPortfolio = portfolioRepo.findById(req.getPortfolioID());
         if (existingPortfolio.isEmpty()) {
-            throw new IllegalArgumentException("Portfolio with ID " + req.getPortfolioID() + " does not exist.");
+            throw new StockIllegalArgumentException("Portfolio with ID " + req.getPortfolioID() + " does not exist.");
         }
         Portfolio portfolio = existingPortfolio.get();
         StockId stockId = new StockId(req.getTickerSymbol(), req.getPortfolioID());
+<<<<<<< HEAD
         StockData stockData = stockDataRepository.findByTickerSymbol(req.getTickerSymbol());
         logger.info("Received stock quote from DB:\nSymbol: {}\nPrice: {}\nChange %: {}", stockData.getTickerSymbol(), stockData.getPrice(), stockData.getChangePercent());
         logger.info("User wants {} x{}", req.getTickerSymbol(), req.getQty());
         logger.info("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()));
         //check if user can afford stock purchase
         if (existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()) < 0)
+=======
+
+        // Check if stock already exists
+        Optional<Stock> existingStock = stockRepo.findById(stockId);
+        if (existingStock.isPresent()) {
+            throw new StockIllegalArgumentException("Stock " + req.getTickerSymbol() + " already exists in portfolio " +
+                    req.getPortfolioID() + ". Please use the update method.");
+        }
+
+        QuoteResponse quote =
+                AlphaVantage
+                        .api()
+                        .timeSeries()
+                        .quote()
+                        .forSymbol(req.getTickerSymbol())
+                        .fetchSync();
+        logger.info("Received stock quote from AlphaVantage API:" +
+                "Symbol: {}" +
+                "Price: {}," +
+                "Change %: {}", quote.getSymbol(), quote.getPrice(), quote.getChangePercent());
+        //check if portfolio has enough cash to purchase
+        logger.debug("User wants {} x{}", req.getTickerSymbol(), req.getQty());
+        logger.debug("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (quote.getPrice() * req.getQty()));
+        if (existingPortfolio.get().getCash() - (quote.getPrice() * req.getQty()) < 0)
+>>>>>>> hannah_branch
             throw new InsufficientCashException("Your portfolio does not have enough cash to purchase x" + req.getQty()
                     + " of " + req.getTickerSymbol());
 
@@ -112,7 +139,7 @@ public class StockService {
     public Stock updateStockRequest(String ticker, Integer portfolioID, UpdateStockRequest req) {
         Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
         if (existingStock.isEmpty()) {
-            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID +
+            throw new StockIllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID +
                     ". Please add the stock first.");
         }
 
@@ -168,7 +195,7 @@ public class StockService {
     public void deleteStockById(String ticker, Integer portfolioID) {
         Optional<Stock> existingStock = stockRepo.findById(new StockId(ticker, portfolioID));
         if (existingStock.isEmpty()) {
-            throw new IllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
+            throw new StockIllegalArgumentException("Stock " + ticker + " does not exist in portfolio " + portfolioID + ".");
         }
 
         stockRepo.deleteById(new StockId(ticker, portfolioID));

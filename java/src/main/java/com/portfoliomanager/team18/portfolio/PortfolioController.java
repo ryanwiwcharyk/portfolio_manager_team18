@@ -1,6 +1,8 @@
 package com.portfoliomanager.team18.portfolio;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,27 +15,32 @@ public class PortfolioController {
     private PortfolioService portfolioService;
 
     @GetMapping
-    public List<Portfolio> getAllPortfolio() {
-        return portfolioService.getAllPortfolio();
+    public ResponseEntity<List<Portfolio>> getAllPortfolio() {
+        List<Portfolio> portfolioList = portfolioService.getAllPortfolio();
+        return ResponseEntity.ok(portfolioList);
     }
 
     @GetMapping("/{id}")
-    public Portfolio getPortfolioById(@PathVariable Integer id) {
-        return portfolioService.getPortfolioById(id);
+    public ResponseEntity<Portfolio> getPortfolioById(@PathVariable Integer id) {
+        Portfolio portfolio = portfolioService.getPortfolioById(id);
+        return ResponseEntity.ok(portfolio);
     }
 
     @PostMapping
-    public Portfolio createPortfolio(@RequestBody NewPortfolioRequest req) {
-        return portfolioService.saveNewPortfolioRequest(req);
+    public ResponseEntity<Portfolio> createPortfolio(@RequestBody NewPortfolioRequest req) {
+        Portfolio portfolio = portfolioService.saveNewPortfolioRequest(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(portfolio);
     }
 
     @PutMapping("/{id}")
-    public Portfolio updatePortfolio(@PathVariable Integer id, @RequestBody UpdatePortfolioRequest req) {
-        return portfolioService.updatePortfolioRequest(id, req);
+    public ResponseEntity<Portfolio> updatePortfolio(@PathVariable Integer id, @RequestBody UpdatePortfolioRequest req) {
+        Portfolio portfolio = portfolioService.updatePortfolioRequest(id, req);
+        return ResponseEntity.ok(portfolio);
     }
 
     @DeleteMapping("/{id}")
-    public void deletePortfolio(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolioById(id);
+        return ResponseEntity.noContent().build();
     }
 }

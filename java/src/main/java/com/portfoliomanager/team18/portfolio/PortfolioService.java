@@ -1,6 +1,10 @@
 package com.portfoliomanager.team18.portfolio;
 
+<<<<<<< HEAD
 import com.portfoliomanager.team18.stock.StockRepository;
+=======
+import com.portfoliomanager.team18.exception.PortfolioIllegalArgumentException;
+>>>>>>> hannah_branch
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +25,7 @@ public class PortfolioService {
     public Portfolio getPortfolioById(Integer id) {
         Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
         if (existingPortfolio.isEmpty()) {
-            throw new IllegalArgumentException("Portfolio doesn't exist.");
+            throw new PortfolioIllegalArgumentException("Portfolio doesn't exist.");
         }
 
         return existingPortfolio.get();
@@ -30,7 +34,7 @@ public class PortfolioService {
     public Portfolio saveNewPortfolioRequest(NewPortfolioRequest req) {
         Optional<Portfolio> existing = portfolioRepo.findByPortfolioName(req.getPortfolioName());
         if (existing.isPresent()) {
-            throw new IllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
+            throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
         }
 
         Portfolio p = new Portfolio();
@@ -43,7 +47,7 @@ public class PortfolioService {
     public Portfolio updatePortfolioRequest(Integer id, UpdatePortfolioRequest req) {
         Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
         if (existingPortfolio.isEmpty()) {
-            throw new IllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
+            throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
         }
 
         Portfolio p = existingPortfolio.get();
@@ -57,7 +61,7 @@ public class PortfolioService {
     public void deletePortfolioById(Integer id) {
         Optional<Portfolio> existingPortfolio = portfolioRepo.findById(id);
         if (existingPortfolio.isEmpty()) {
-            throw new IllegalArgumentException("Portfolio doesn't exist.");
+            throw new PortfolioIllegalArgumentException("Portfolio doesn't exist.");
         }
 
         portfolioRepo.deleteById(id);
