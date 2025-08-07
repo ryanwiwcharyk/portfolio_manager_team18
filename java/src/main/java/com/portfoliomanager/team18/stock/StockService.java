@@ -34,6 +34,7 @@ public class StockService {
     private TransactionRepository transactionRepository;
 
     public List<Stock> getStockByPortfolioId(Integer id) {
+        stockRepo.updateOutdatedStockPrices(id);
         return stockRepo.findByPortfolioID(id);
     }
 
