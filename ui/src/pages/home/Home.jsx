@@ -109,7 +109,6 @@ function Home() {
       </p>
       <div className="button-wrapper">
         <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Add Portfolio</button>
-        <button className="button-container-portfolio" onClick={handleOpenCreateModal}>Search Portfolio</button>
       </div>
       <div className="portfolio-container">
         {portfolios.map((portfolio) => (
