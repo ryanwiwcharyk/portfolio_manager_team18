@@ -120,7 +120,7 @@ p {
   width: 180px;
   height: 180px;
   background: #fff;
-  background-image: url('../images/portfolio_bg.jpg');
+  background-image: url('../images/table_bg.jpg');
   border: 1.5px solid #2571db;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(86, 78, 78, 0.01);
@@ -142,7 +142,7 @@ p {
 .portfolio-square p {
   margin: 0;
   color: #2fbeab;
-  font-size: 1rem;
+  font-size: 1.2rem;
   text-align: center;
 }
 
@@ -187,8 +187,8 @@ p {
 
 .portfolio-square h2 {
   margin: 0 0 8px 0;
-  font-size: 2rem;
-  color: #6a34c8;
+  font-size: 1.8rem;
+  color: #f0eef3;
   text-align: center;
   width: 100%;
   word-break: break-word;
