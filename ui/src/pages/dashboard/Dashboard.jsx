@@ -94,10 +94,10 @@ function Dashboard() {
     const fetchTransactions = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const response = await getTransactionsByPortfolioId(id);
-        
+
         const data = response.data;
         const sortedData = data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
         setTransactions(sortedData);
@@ -150,74 +150,74 @@ function Dashboard() {
   }
 
   const calculateUnrealizedPnL = (stocks) => {
-  if (!stocks || stocks.length === 0) return 0;
+    if (!stocks || stocks.length === 0) return 0;
 
-  return stocks.reduce((sum, stock) => {
-    const marketValue = stock.currentPrice * stock.qty;
-    const costBasis = stock.avgPrice * stock.qty;
-    return sum + (marketValue - costBasis);
-  }, 0);
-};
+    return stocks.reduce((sum, stock) => {
+      const marketValue = stock.currentPrice * stock.qty;
+      const costBasis = stock.avgPrice * stock.qty;
+      return sum + (marketValue - costBasis);
+    }, 0);
+  };
 
-const calculateRealizedPnL = (transactions) => {
-  if (!transactions || transactions.length === 0) return 0;
+  const calculateRealizedPnL = (transactions) => {
+    if (!transactions || transactions.length === 0) return 0;
 
-  let realizedPnL = 0;
-  const costBasis = {};
+    let realizedPnL = 0;
+    const costBasis = {};
 
-  const sorted = [...transactions].sort((a, b) => new Date(a.transactionTime) - new Date(b.transactionTime));
+    const sorted = [...transactions].sort((a, b) => new Date(a.transactionTime) - new Date(b.transactionTime));
 
-  for (const tx of sorted) {
-    const ticker = tx.tickerSymbol;
-    const qty = tx.qty;
-    const price = tx.price;
+    for (const tx of sorted) {
+      const ticker = tx.tickerSymbol;
+      const qty = tx.qty;
+      const price = tx.price;
 
-    if (!costBasis[ticker]) {
-      costBasis[ticker] = { totalQty: 0, totalCost: 0 };
+      if (!costBasis[ticker]) {
+        costBasis[ticker] = { totalQty: 0, totalCost: 0 };
+      }
+
+      if (!tx.sell) {
+        costBasis[ticker].totalQty += qty;
+        costBasis[ticker].totalCost += price * qty;
+      } else {
+        const { totalQty, totalCost } = costBasis[ticker];
+        if (totalQty === 0) continue;
+
+        const avgCost = totalCost / totalQty;
+        realizedPnL += (price - avgCost) * qty;
+
+        costBasis[ticker].totalQty -= qty;
+        costBasis[ticker].totalCost -= avgCost * qty;
+      }
     }
 
-    if (!tx.sell) {
-      costBasis[ticker].totalQty += qty;
-      costBasis[ticker].totalCost += price * qty;
-    } else {
-      const { totalQty, totalCost } = costBasis[ticker];
-      if (totalQty === 0) continue;
-
-      const avgCost = totalCost / totalQty;
-      realizedPnL += (price - avgCost) * qty;
-
-      costBasis[ticker].totalQty -= qty;
-      costBasis[ticker].totalCost -= avgCost * qty;
-    }
-  }
-
-  return realizedPnL;
-};
+    return realizedPnL;
+  };
 
 
   const onSellSubmit = async (data) => {
-  try {
-    const requestData = {
-      portfolioID: portfolio.portfolioID,
-      tickerSymbol: selectedStock.tickerSymbol,
-      qty: data.qty
-    };
+    try {
+      const requestData = {
+        portfolioID: portfolio.portfolioID,
+        tickerSymbol: selectedStock.tickerSymbol,
+        qty: data.qty
+      };
 
-    const response = await sellStock(requestData);
-    portfolio.cash = portfolio.cash + response.data.updatedCash;
+      const response = await sellStock(requestData);
+      portfolio.cash = portfolio.cash + response.data.updatedCash;
 
-    const stocksResponse = await getStocks(portfolio.portfolioID);
-    setPortfolioStocks(stocksResponse.data || []);
+      const stocksResponse = await getStocks(portfolio.portfolioID);
+      setPortfolioStocks(stocksResponse.data || []);
 
-    const txResponse = await getTransactionsByPortfolioId(portfolio.portfolioID);
-    const sortedTxs = txResponse.data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
-    setTransactions(sortedTxs);
-  } catch (error) {
-    notify('Failed to sell stock: ' + error.response.data.errorMessage);
-  } finally {
-    handleCloseSellModal();
-  }
-};
+      const txResponse = await getTransactionsByPortfolioId(portfolio.portfolioID);
+      const sortedTxs = txResponse.data.sort((a, b) => new Date(b.transactionTime) - new Date(a.transactionTime));
+      setTransactions(sortedTxs);
+    } catch (error) {
+      notify('Failed to sell stock: ' + error.response.data.errorMessage);
+    } finally {
+      handleCloseSellModal();
+    }
+  };
 
 
   const onDepositSubmit = async (data) => {
@@ -246,7 +246,7 @@ const calculateRealizedPnL = (transactions) => {
     const date = formatISOToDateTime(transaction.transactionTime);
     const type = transaction.sell === true ? 'SELL' : 'BUY';
     const total = (transaction.price * transaction.qty).toFixed(2);
-    
+
     return {
       id: transaction.transactionID,
       date: date,
@@ -284,14 +284,14 @@ const calculateRealizedPnL = (transactions) => {
   if (portfolioLoading) {
     return (
       <div className="dashboard-root">
-        <div className="loading-container" style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div className="loading-container" style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '50vh',
           flexDirection: 'column'
         }}>
-          <div className="loading-spinner" style={{ 
+          <div className="loading-spinner" style={{
             border: '4px solid #f3f4f6',
             borderTop: '4px solid #002B51',
             borderRadius: '50%',
@@ -309,23 +309,23 @@ const calculateRealizedPnL = (transactions) => {
   if (portfolioError) {
     return (
       <div className="dashboard-root">
-        <div className="error-container" style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div className="error-container" style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '50vh',
           flexDirection: 'column',
           textAlign: 'center',
           padding: '20px'
         }}>
-          <div style={{ 
-            fontSize: '64px', 
+          <div style={{
+            fontSize: '64px',
             marginBottom: '20px',
             color: '#e53e3e'
           }}>⚠️</div>
           <h2 style={{ color: '#e53e3e', marginBottom: '10px' }}>Portfolio Not Found</h2>
-          <p style={{ 
-            color: '#666', 
+          <p style={{
+            color: '#666',
             marginBottom: '20px',
             maxWidth: '400px',
             lineHeight: '1.5'
@@ -333,13 +333,13 @@ const calculateRealizedPnL = (transactions) => {
             {portfolioError}
           </p>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
+            <button
               className="dashboard-action-btn"
               onClick={() => window.history.back()}
             >
               Go Back
             </button>
-            <button 
+            <button
               className="dashboard-action-btn"
               onClick={() => window.location.href = '/'}
             >
@@ -369,9 +369,9 @@ const calculateRealizedPnL = (transactions) => {
   // Calculate portfolio allocation data for pie chart
   const getPortfolioAllocation = () => {
     if (!portfolio || !portfolioStocks) return [];
-    
+
     const allocation = [];
-    
+
     // Add cash
     if (portfolio.cash > 0) {
       allocation.push({
@@ -381,7 +381,7 @@ const calculateRealizedPnL = (transactions) => {
         percentage: 0
       });
     }
-    
+
     // Add stocks
     portfolioStocks.forEach(stock => {
       const stockValue = stock.qty * stock.currentPrice;
@@ -394,13 +394,13 @@ const calculateRealizedPnL = (transactions) => {
         });
       }
     });
-    
+
     // Calculate percentages
     const totalValue = allocation.reduce((sum, item) => sum + item.value, 0);
     allocation.forEach(item => {
       item.percentage = totalValue > 0 ? (item.value / totalValue) * 100 : 0;
     });
-    
+
     return allocation.sort((a, b) => b.value - a.value); // Sort by value descending
   };
 
@@ -432,21 +432,21 @@ const calculateRealizedPnL = (transactions) => {
     allocation.forEach((item, index) => {
       const angle = (item.percentage / 100) * 2 * Math.PI;
       const endAngle = currentAngle + angle;
-      
+
       const x1 = centerX + radius * Math.cos(currentAngle);
       const y1 = centerY + radius * Math.sin(currentAngle);
       const x2 = centerX + radius * Math.cos(endAngle);
       const y2 = centerY + radius * Math.sin(endAngle);
-      
+
       const largeArcFlag = angle > Math.PI ? 1 : 0;
-      
+
       const pathData = [
         `M ${centerX} ${centerY}`,
         `L ${x1} ${y1}`,
         `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
         'Z'
       ].join(' ');
-      
+
       paths.push(
         <path
           key={index}
@@ -456,7 +456,7 @@ const calculateRealizedPnL = (transactions) => {
           strokeWidth="2"
         />
       );
-      
+
       currentAngle = endAngle;
     });
 
@@ -477,14 +477,16 @@ const calculateRealizedPnL = (transactions) => {
   // Render pie chart legend
   const renderPieChartLegend = () => {
     const allocation = getPortfolioAllocation();
-    
+
     return (
       <div className="legend-items">
         {allocation.map((item, index) => (
           <div key={index} className="legend-item">
-            <div className="legend-color" style={{ backgroundColor: item.color }}></div>
-            <div className="legend-text">
+            <div className="legend-header">
+              <div className="legend-color" style={{ backgroundColor: item.color }}></div>
               <span className="legend-name">{item.name}</span>
+            </div>
+            <div className="legend-text">
               <span className="legend-value">{formatter.format(item.value)}</span>
               <span className="legend-percentage">({item.percentage.toFixed(1)}%)</span>
             </div>
@@ -497,10 +499,10 @@ const calculateRealizedPnL = (transactions) => {
   if (!portfolio) {
     return (
       <div className="dashboard-root">
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '50vh'
         }}>
           <p>No portfolio data available.</p>
@@ -510,39 +512,41 @@ const calculateRealizedPnL = (transactions) => {
   }
 
   const getTotalPortfolioValue = () => {
-  if (!portfolio || !portfolioStocks) return 0;
-  const stockValue = portfolioStocks.reduce((total, stock) => total + (stock.qty * stock.currentPrice), 0);
-  return portfolio.cash + stockValue - 1000;
-};
+    if (!portfolio || !portfolioStocks) return 0;
+    const stockValue = portfolioStocks.reduce((total, stock) => total + (stock.qty * stock.currentPrice), 0);
+    return portfolio.cash + stockValue - 1000;
+  };
 
-  
+
 
 
 
   const renderDashboardTab = () => (
     <>
-        <div className="dashboard-actions-top">
-          <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
-          <button onClick={handleOpenDepositModal} className="dashboard-action-btn">Deposit</button>
-          <button onClick={handleOpenWithdrawModal} className="dashboard-action-btn">Withdraw</button>
+      <div className="dashboard-actions-top">
+        <button onClick={handleOpenBuyModal} className="dashboard-action-btn">Buy</button>
+        <button onClick={handleOpenDepositModal} className="dashboard-action-btn">Deposit</button>
+        <button onClick={handleOpenWithdrawModal} className="dashboard-action-btn">Withdraw</button>
       </div>
       <div className="dashboard-section">
         <h2>Portfolio Allocation</h2>
-        <div className="portfolio-summary">
-          <h2>
-            Portfolio Value: {formatter.format(getTotalPortfolioValue())}
-          </h2>
-          <h2 style={{ color: unrealizedP >= 0 ? 'limegreen' : 'tomato' }}>
-            Unrealized {unrealizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(unrealizedP))}
-          </h2>
-          <h2 style={{ color: realizedP >= 0 ? 'limegreen' : 'tomato' }}>
-            Realized {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(realizedP))}
-          </h2>
-
-          
-        </div>
         <div className="pie-chart-container">
           {renderPieChart()}
+          <div className="portfolio-summary">
+            <h2>
+              Portfolio Value: {formatter.format(getTotalPortfolioValue())}
+            </h2>
+            <h2 style={{ color: unrealizedP >= 0 ? 'limegreen' : 'tomato' }}>
+              Unrealized {unrealizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(unrealizedP))}
+            </h2>
+            <h2 style={{ color: realizedP >= 0 ? 'limegreen' : 'tomato' }}>
+              Realized {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(realizedP))}
+            </h2>
+            <h2 style={{ color: (unrealizedP + realizedP) >= 0 ? 'limegreen' : 'tomato' }}>
+              Total {realizedP >= 0 ? 'Profit' : 'Loss'}: {formatter.format(Math.abs(unrealizedP + realizedP))}
+            </h2>
+            
+          </div>
         </div>
         <div className="pie-chart-legend">
           {renderPieChartLegend()}
@@ -576,15 +580,15 @@ const calculateRealizedPnL = (transactions) => {
                   <td>{parseFloat(stock.avgPrice).toFixed(2)}</td>
                   <td>{stock.currentPrice}</td>
                   <td style={{ color: stock.changePercent >= 0 ? 'green' : 'red' }}>{stock.changePercent}</td>
-                   <td>
+                  <td>
                     <div className="dashboard-action-btn-group">
-                    <button
-                      onClick={() => handleOpenSellModal(stock)}
-                      className="dashboard-action-btn"
-                      title="Sell"
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
+                      <button
+                        onClick={() => handleOpenSellModal(stock)}
+                        className="dashboard-action-btn"
+                        title="Sell"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
                     </div>
                   </td>
 
@@ -614,10 +618,10 @@ const calculateRealizedPnL = (transactions) => {
                     value: /^[A-Za-z]{1,4}$/,
                     message: "Ticker must be 1-4 letters"
                   }
-                })} 
-                id="ticker-symbol" 
-                type="text" 
-                placeholder="ex: AAPL, MSFT..." 
+                })}
+                id="ticker-symbol"
+                type="text"
+                placeholder="ex: AAPL, MSFT..."
                 maxLength={4}
                 style={{ textTransform: 'uppercase' }}
                 onInput={(e) => e.target.value = e.target.value.toUpperCase()}
@@ -634,7 +638,7 @@ const calculateRealizedPnL = (transactions) => {
           </div>
         </div>
       )}
-       {showSellModal && selectedStock && (
+      {showSellModal && selectedStock && (
         <div className="modal-backdrop">
           <div className="modal">
             <h2>
@@ -675,103 +679,103 @@ const calculateRealizedPnL = (transactions) => {
             </form>
           </div>
         </div>
-             )}
-       {showDepositModal && (
-         <div className="modal-backdrop">
-           <div className="modal">
-             <h2>Deposit Cash</h2>
-             <form className="form-control" onSubmit={handleSubmit(onDepositSubmit)}>
-               <label htmlFor="deposit-amount">Amount ($):</label>
-               <input
-                 {...register("amount", {
-                   required: true,
-                   min: 0.01,
-                   valueAsNumber: true,
-                 })}
-                 id="deposit-amount"
-                 type="number"
-                 step="0.01"
-                 min="0.01"
-                 placeholder="Enter amount to deposit"
-               />
-               {errors.amount && (
-                 <span className="error-message">
-                   {errors.amount.message || "Please enter a valid amount"}
-                 </span>
-               )}
-               <div className="button-row">
-                 <button type="submit">Deposit</button>
-                 <button type="button" onClick={handleCloseDepositModal}>Cancel</button>
-               </div>
-             </form>
-           </div>
-         </div>
-       )}
-       {showWithdrawModal && (
-         <div className="modal-backdrop">
-           <div className="modal">
-             <h2>Withdraw Cash</h2>
-             <form className="form-control" onSubmit={handleSubmit(onWithdrawSubmit)}>
-               <label htmlFor="withdraw-amount">Amount ($):</label>
-               <input
-                 {...register("amount", {
-                   required: true,
-                   min: 0.01,
-                   max: portfolio.cash,
-                   valueAsNumber: true,
-                 })}
-                 id="withdraw-amount"
-                 type="number"
-                 step="0.01"
-                 min="0.01"
-                 max={portfolio.cash}
-                 placeholder={`Max: ${formatter.format(portfolio.cash)}`}
-               />
-               {errors.amount && (
-                 <span className="error-message">
-                   {errors.amount.message || `Enter a value between 0.01 and ${formatter.format(portfolio.cash)}`}
-                 </span>
-               )}
-               <div className="button-row">
-                 <button type="submit">Withdraw</button>
-                 <button type="button" onClick={handleCloseWithdrawModal}>Cancel</button>
-               </div>
-             </form>
-           </div>
-         </div>
-       )}
-       <ToastContainer />
-     </>
-   );
+      )}
+      {showDepositModal && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>Deposit Cash</h2>
+            <form className="form-control" onSubmit={handleSubmit(onDepositSubmit)}>
+              <label htmlFor="deposit-amount">Amount ($):</label>
+              <input
+                {...register("amount", {
+                  required: true,
+                  min: 0.01,
+                  valueAsNumber: true,
+                })}
+                id="deposit-amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="Enter amount to deposit"
+              />
+              {errors.amount && (
+                <span className="error-message">
+                  {errors.amount.message || "Please enter a valid amount"}
+                </span>
+              )}
+              <div className="button-row">
+                <button type="submit">Deposit</button>
+                <button type="button" onClick={handleCloseDepositModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showWithdrawModal && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>Withdraw Cash</h2>
+            <form className="form-control" onSubmit={handleSubmit(onWithdrawSubmit)}>
+              <label htmlFor="withdraw-amount">Amount ($):</label>
+              <input
+                {...register("amount", {
+                  required: true,
+                  min: 0.01,
+                  max: portfolio.cash,
+                  valueAsNumber: true,
+                })}
+                id="withdraw-amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={portfolio.cash}
+                placeholder={`Max: ${formatter.format(portfolio.cash)}`}
+              />
+              {errors.amount && (
+                <span className="error-message">
+                  {errors.amount.message || `Enter a value between 0.01 and ${formatter.format(portfolio.cash)}`}
+                </span>
+              )}
+              <div className="button-row">
+                <button type="submit">Withdraw</button>
+                <button type="button" onClick={handleCloseWithdrawModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <ToastContainer />
+    </>
+  );
 
   const renderTransactionsTab = () => (
     <div className="dashboard-section">
       <h2>Transaction History</h2>
-      
+
       {loading && (
         <div className="loading-message">
           <p>Loading transactions...</p>
         </div>
       )}
-      
+
       {error && (
         <div className="error-message">
           <p>{error}</p>
-          <button 
-            className="dashboard-action-btn" 
+          <button
+            className="dashboard-action-btn"
             onClick={() => window.location.reload()}
           >
             Retry
           </button>
         </div>
       )}
-      
+
       {!loading && !error && transactions.length === 0 && (
         <div className="no-data-message">
           <p>No transactions found.</p>
         </div>
       )}
-      
+
       {!loading && !error && transactions.length > 0 && (
         <table className="dashboard-table">
           <thead>
@@ -811,7 +815,7 @@ const calculateRealizedPnL = (transactions) => {
   return (
     <div className="dashboard-root">
       <div className="dashboard-header">
-        <button 
+        <button
           className="dashboard-back-btn"
           onClick={() => window.location.href = '/'}
           style={{
@@ -833,16 +837,16 @@ const calculateRealizedPnL = (transactions) => {
         <h1>{portfolio.portfolioName}</h1>
         <h3>{portfolio.description}</h3>
       </div>
-      
+
       {/* Tab Navigation */}
       <div className="dashboard-tabs">
-        <button 
+        <button
           className={`dashboard-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
           Dashboard
         </button>
-        <button 
+        <button
           className={`dashboard-tab ${activeTab === 'transactions' ? 'active' : ''}`}
           onClick={() => setActiveTab('transactions')}
         >

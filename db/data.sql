@@ -7,7 +7,7 @@ SET SQL_SAFE_UPDATES = 0;
 DELETE FROM transactions;
 DELETE FROM stocks;
 DELETE FROM portfolios;
-DROP TABLE stock_data;
+DELETE FROM stock_data;
 
 -- RE-ENABLE SAFE UPDATES
 SET SQL_SAFE_UPDATES = 1;

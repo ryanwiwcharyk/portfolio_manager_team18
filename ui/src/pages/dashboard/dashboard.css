@@ -87,25 +87,28 @@
 
 .portfolio-summary {
   display: flex;
-  gap: 2rem;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  justify-content: flex-start;
 }
 
-.portfolio-summary p {
+.portfolio-summary h2 {
   margin: 0;
+  font-size: 1.2rem;
 }
 
 
 /* Pie Chart Styles */
 .pie-chart-container {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 48px;
+  justify-content:center;
   margin: 20px 0;
   min-height: 250px;
 }
+
 
 .pie-chart {
   max-width: 200px;
@@ -114,6 +117,23 @@
 
 .pie-chart-legend {
   margin-top: 20px;
+}
+
+.legend-header {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.legend-name {
+  font-size: 1rem;
+  color: #2d3748;
+  font-weight: 600;
+  margin: 0;
+}
+
+.legend-value {
+  margin: 0;
 }
 
 .legend-items {
@@ -125,6 +145,7 @@
 
 .legend-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;

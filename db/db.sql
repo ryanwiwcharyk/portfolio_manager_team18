@@ -2,28 +2,31 @@ CREATE DATABASE IF NOT EXISTS portfolio_manager;
 USE portfolio_manager;
 
 CREATE TABLE IF NOT EXISTS portfolios (
-    portfolioID INT AUTO_INCREMENT PRIMARY KEY,
-    portfolioName VARCHAR(255) NOT NULL,
+    portfolioid INT AUTO_INCREMENT PRIMARY KEY,
+    portfolio_name VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
     cash DECIMAL(15,2) NOT NULL DEFAULT 1000.0
 );
 
 CREATE TABLE IF NOT EXISTS stocks (
-    tickerSymbol VARCHAR(10) NOT NULL,
-    portfolioID INT NOT NULL,
+    ticker_symbol VARCHAR(10) NOT NULL,
+    portfolioid INT NOT NULL,
     qty INT NOT NULL,
-    avgPrice DECIMAL(15,2) NOT NULL,
-    PRIMARY KEY (portfolioID, tickerSymbol),
-    FOREIGN KEY (portfolioID) REFERENCES portfolios(portfolioID) ON DELETE CASCADE
+    avg_price DECIMAL(15,2) NOT NULL,
+    current_price DECIMAL(15,2) NOT NULL,
+    change_percent DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (portfolioid, ticker_symbol),
+    FOREIGN KEY (portfolioid) REFERENCES portfolios(portfolioid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
-    transactionID INT AUTO_INCREMENT PRIMARY KEY,
-    tickerSymbol VARCHAR(10) NOT NULL,
-    portfolioID INT NOT NULL,
+    transactionid INT AUTO_INCREMENT PRIMARY KEY,
+    ticker_symbol VARCHAR(10) NOT NULL,
+    portfolioid INT NOT NULL,
     price DECIMAL(15,2) NOT NULL,
     qty INT NOT NULL,
-    isSell BOOLEAN NOT NULL,
-    transactionTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_sell BOOLEAN NOT NULL,
+    transaction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (portfolioID) REFERENCES portfolios(portfolioID) ON DELETE CASCADE
 );
 
