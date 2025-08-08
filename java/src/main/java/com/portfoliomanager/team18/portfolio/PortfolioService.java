@@ -57,12 +57,16 @@ public class PortfolioService {
         if (existingPortfolio.isEmpty()) {
             throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' doesn't exist.");
         }
+        Portfolio p = existingPortfolio.get();
 
-        if (portfolioRepo.findByPortfolioName(req.getPortfolioName()).isPresent()) {
-            throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
+        // Only check for duplicate portfolio name if the name is actually changing
+        if (!req.getPortfolioName().equals(p.getPortfolioName())) {
+            Optional<Portfolio> nameExists = portfolioRepo.findByPortfolioName(req.getPortfolioName());
+            if (nameExists.isPresent()) {
+                throw new PortfolioIllegalArgumentException("Portfolio with name '" + req.getPortfolioName() + "' already exists.");
+            }
         }
 
-        Portfolio p = existingPortfolio.get();
         p.setPortfolioName(req.getPortfolioName());
         p.setDescription(req.getDescription());
         p.setCash(req.getCash());

@@ -566,8 +566,8 @@ function Dashboard() {
               <th>Stock</th>
               <th>Shares</th>
               <th>Avg Price ($)</th>
-              <th>Price Per Share ($)</th>
-              <th>Change (%)</th>
+              <th>Current Price ($)</th>
+              <th>Daily Change (%)</th>
               <th>Actions</th>
             </tr>
           </thead>

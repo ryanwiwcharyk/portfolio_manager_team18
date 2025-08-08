@@ -314,8 +314,9 @@
 .dashboard-action-btn-group {
   display: flex;
   gap: 12px;
-  margin-bottom: 12px;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
 }
 
 .dashboard-actions-bottom {
@@ -332,6 +333,16 @@ form .error-message,
   padding: 0;
   line-height: 1.2;
   display: block;
+}
+
+/* Table action button styling */
+.dashboard-table td .dashboard-action-btn {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
