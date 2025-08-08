@@ -828,8 +828,8 @@ function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            color: '#666',
-            fontSize: '14px'
+            color: '#35db77',
+            fontSize: '15px'
           }}
         >
           ← Go Back
