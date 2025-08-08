@@ -613,16 +613,16 @@ function Dashboard() {
               <input {...register("tickerSymbol",
                 {
                   required: true,
-                  maxLength: 4,
+                  maxLength: 6,
                   pattern: {
-                    value: /^[A-Za-z]{1,4}$/,
-                    message: "Ticker must be 1-4 letters"
+                    value: /^[A-Za-z]{1,6}$/,
+                    message: "Ticker must be 1-6 letters"
                   }
                 })}
                 id="ticker-symbol"
                 type="text"
                 placeholder="ex: AAPL, MSFT..."
-                maxLength={4}
+                maxLength={6}
                 style={{ textTransform: 'uppercase' }}
                 onInput={(e) => e.target.value = e.target.value.toUpperCase()}
               />

@@ -56,6 +56,9 @@ public class StockService {
         Portfolio portfolio = existingPortfolio.get();
         StockId stockId = new StockId(req.getTickerSymbol(), req.getPortfolioID());
         StockData stockData = stockDataRepository.findByTickerSymbol(req.getTickerSymbol());
+        if (stockData == null) {
+            throw new IllegalArgumentException("Stock data not found for ticker " + req.getTickerSymbol());
+        }
         logger.info("Received stock quote from DB:\nSymbol: {}\nPrice: {}\nChange %: {}", stockData.getTickerSymbol(), stockData.getPrice(), stockData.getChangePercent());
         logger.info("User wants {} x{}", req.getTickerSymbol(), req.getQty());
         logger.info("Portfolio cash: {}\nCash to purchase: {}", existingPortfolio.get().getCash(), existingPortfolio.get().getCash() - (stockData.getPrice() * req.getQty()));
