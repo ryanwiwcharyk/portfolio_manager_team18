@@ -180,9 +180,12 @@ p {
 }
 
 .error-message {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 4px;
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin: 2px 0;
+  padding: 0;
+  line-height: 1.2;
+  display: block;
 }
 
 .portfolio-square h2 {

@@ -323,4 +323,15 @@
   gap: 8px;
 }
 
+/* Form Error Messages - Compact styling for modal forms */
+form .error-message,
+.form-control .error-message {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin: 2px 0;
+  padding: 0;
+  line-height: 1.2;
+  display: block;
+}
+
 
